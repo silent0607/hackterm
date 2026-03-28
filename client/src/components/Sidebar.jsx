@@ -15,6 +15,8 @@ const NAV_ITEMS = [
   { id: 'network',    label: 'Ağ Güvenliği',    icon: '🔒' },
   { id: 'john',       label: 'John & Hashcat',  icon: '🔑' },
   { id: 'aws',        label: 'AWS',             icon: '☁' },
+  { id: 'openvpn',    label: 'OpenVPN',         icon: '🛡️' },
+  { id: 'burp',       label: 'Burp Suite',      icon: '🐝' },
   { id: 'grep',       label: 'Grep',            icon: '🔎' },
 ];
 

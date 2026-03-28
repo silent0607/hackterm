@@ -17,6 +17,8 @@ import PhpShellPage from './pages/PhpShellPage';
 import NetworkPage from './pages/NetworkPage';
 import JohnPage from './pages/JohnPage';
 import AwsPage from './pages/AwsPage';
+import OpenVpnPage from './pages/OpenVpnPage';
+import BurpPage from './pages/BurpPage';
 import GrepPage from './pages/GrepPage';
 
 function Topbar({ rightOpen, onToggleRight }) {
@@ -66,6 +68,8 @@ const PAGE_MAP = {
   network:    (props) => <NetworkPage {...props} />,
   john:       (props) => <JohnPage {...props} />,
   aws:        (props) => <AwsPage {...props} />,
+  openvpn:    (props) => <OpenVpnPage {...props} />,
+  burp:       (props) => <BurpPage {...props} />,
   grep:       (props) => <GrepPage {...props} />,
 };
 

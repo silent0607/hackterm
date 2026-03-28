@@ -1,67 +1,78 @@
-# 🛡️ HackTerm (HackTool Basic)
+# 🛡️ HackTerm (HackTool Basic) - Gelişmiş Güvenlik Terminali
 
-**HackTerm**, sızma testi süreçlerini hızlandırmak ve yaygın kullanılan güvenlik araçlarını tek bir yerden yönetmek için tasarlanmış, modern ve etkileşimli bir web terminal arayüzüdür.
+**HackTerm**, sızma testi süreçlerini otomatize etmek, yaygın kullanılan güvenlik araçlarını merkezi bir web arayüzünden yönetmek ve grafik arayüzlü (GUI) araçları tarayıcı üzerinden kullanmak için tasarlanmış profesyonel bir sızma testi platformudur.
 
-![HackTerm Logo](https://raw.githubusercontent.com/silent0607/hackterm/main/client/public/logo.png) *<!-- Opsiyonel logo -->*
+---
 
-## ✨ Özellikler
+## ⚠️ Yasal Uyarı ve Sorumluluk Reddi (Legal Disclaimer)
 
-HackTerm, aşağıdaki modülleri içeren kapsamlı bir araç setidir:
+**ÖNEMLİ:** Bu araç sadece **etik hacking**, güvenlik araştırmaları ve yasal sızma testi süreçleri için geliştirilmiştir. 
+*   Bu aracın yetkisiz sistemlere karşı kullanılması **yasa dışıdır** ve ciddi hukuki sonuçlar doğurabilir.
+*   Geliştiriciler, bu aracın yanlış kullanımından veya yol açabileceği zararlardan hiçbir şekilde **sorumlu tutulamaz**.
+*   Bu yazılımı kullanarak, tüm sorumluluğun size ait olduğunu ve yerel/uluslararası yasalar çerçevesinde hareket edeceğinizi kabul etmiş sayılırsınız.
 
-*   **🐚 Etkileşimli Terminal**: xterm.js tabanlı, çoklu oturum destekli yerel ve uzak terminal.
-*   **📡 Nmap**: Ağ tarama ve servis keşfi için hazır komutlar ve sonuç analizi.
-*   **🗄️ Redis Explorer**: Redis veritabanlarına bağlanma, veri çekme ve istismar teknikleri.
-*   **🔥 PHP Reverse Shell**: Tek tıkla reverse shell oluşturma, stabilize etme ve iyileştirme.
-*   **📁 FTP İzleyici**: `downloads` dizinine düşen dosyaları gerçek zamanlı (chokidar) takip etme.
-*   **🗝️ John the Ripper**: Parola kırma süreçlerini web üzerinden yönetme.
-*   **🌐 Gobuster**: Dizin ve dosya kaba kuvvet saldırıları için optimize edilmiş arayüz.
-*   **🗃️ SQL Tools**: Veritabanı sızma teknikleri ve otomatize komutlar.
-*   **☁️ Cloud Security (AWS)**: AWS servislerine yönelik güvenlik kontrolleri.
-*   **💻 Windows Exploitation**: Windows sistemlere özel yetki yükseltme ve sızma araçları.
+---
 
-## 🚀 Kurulum ve Çalıştırma
+## 🔥 Temel Özellikler
 
-### 🐳 Docker ile (Önerilen)
+*   **🖥️ Çift Masaüstü Desteği**: Konteyner içinde **Xfce** veya **GNOME** masaüstü ortamlarını noVNC üzerinden tarayıcıda çalıştırabilme.
+*   **🐝 Burp Suite Entegrasyonu**: Tek tıkla Burp Suite kurulumu, Firefox ile tam uyumlu proxy ve sertifika yönetimi.
+*   **🛡️ OpenVPN Yönetimi**: `.ovpn` yapılandırmalarını web arayüzünden yükleyip tüm konteyner trafiğini VPN üzerinden geçirme.
+*   **🐚 Etkileşimli Terminaller**: PTY destekli yerel terminaller ve uzak SSH bağlantıları.
+*   **🛠️ Entegre Güvenlik Araçları**: Nmap, John the Ripper, Impacket, Gobuster, SQL araçları ve daha fazlası.
+*   **📁 FTP & Dosya Takibi**: `downloads` dizinine düşen dosyaları gerçek zamanlı izleme ve indirme.
+*   **⚙️ Dinamik Yapılandırma**: Portları ve GUI ortamını `.env` dosyası üzerinden kolayca değiştirme.
 
-En hızlı ve sorunsuz kurulum için Docker kullanabilirsiniz. Ubuntu tabanlı imajımız tüm bağımlılıkları (Node.js, Python, Nmap vb.) hazır içermektedir.
+---
 
+## 🚀 Kurulum ve Başlatma
+
+### 🔗 Uzak Sunucu (Server) veya Yerel Kurulum
+
+HackTerm, hem yerel makinenizde hem de uzak bir VPS/Server üzerinde çalışacak şekilde optimize edilmiştir.
+
+#### 1. Depoyu Klonlayın
 ```bash
 git clone https://github.com/silent0607/hackterm.git
 cd hackterm
-docker-compose up --build
 ```
-Uygulamaya `http://localhost:3001` adresinden erişebilirsiniz.
 
-### 🛠️ Manuel Kurulum (Linux/Kali)
+#### 2. Yapılandırma (.env)
+Kendi portlarınızı ve masaüstü tercihinizi belirlemek için `.env` dosyasını düzenleyin:
+```env
+HACKTERM_PORT=3001   # Ana web arayüzü
+NOVNC_PORT=6080      # Masaüstü (noVNC) erişimi
+DESKTOP_ENV=xfce     # xfce veya gnome
+```
 
-1.  **Bağımlılıkları Yükleyin**:
-    ```bash
-    bash setup.sh
-    ```
-    *Bu script Python venv oluşturur ve gerekli kütüphaneleri (Impacket vb.) kurar.*
-
-2.  **Node.js Paketlerini Kurun**:
-    ```bash
-    npm install
-    cd client && npm install
-    ```
-
-3.  **Başlatın**:
-    ```bash
-    # Kök dizinde (root)
-    npm run dev
-    ```
-
-## 🏗️ Teknoloji Yığını
-
-*   **Frontend**: React, Vite, Socket.io-client, Lucide-React, xterm.js.
-*   **Backend**: Node.js, Express, Socket.io, node-pty (Pseudu-terminal), Chokidar (File system watch).
-*   **Environment**: Docker, Python venv.
-
-## ⚠️ Yasal Uyarı
-
-Bu araç sadece **etik hacking** ve sızma testi eğitimleri/profesyonel süreçleri için geliştirilmiştir. Yetkisiz sistemlere yönelik kullanımı yasal sonuçlar doğurabilir. Kullanıcı, yaptığı işlemlerden kendisi sorumludur.
+#### 3. Docker ile Çalıştırın
+```bash
+docker-compose up --build -d
+```
+Uygulamanıza `http://ip-adresiniz:3001` (veya belirlediğiniz port) üzerinden erişebilirsiniz.
 
 ---
-⭐ Gelişime katkıda bulunmak için repoyu yıldızlayabilir veya bir PR gönderebilirsiniz!
+
+## 📟 Masaüstü Yöneticisi (Launcher)
+
+Yerel kullanımda kolaylık sağlaması için `launcher.py` scriptini kullanabilirsiniz:
+*   **Bağlan/Başlat**: Sistemi otomatik açar ve tarayıcıya yönlendirir.
+*   **Terminal**: Konteynere SSH atmadan doğrudan Ubuntu shell'ine yeni bir pencerede bağlanır.
+*   **Temizle**: Tüm volume'ları ve yüklü araçları silerek sistemi sıfırlar.
+
+```bash
+python3 launcher.py
+```
+
+---
+
+## 🛠️ Teknoloji Yığını
+
+*   **Backend**: Node.js, Express, Socket.io, Multer, node-pty.
+*   **Frontend**: React, Vite, Lucide-React, xterm.js.
+*   **Virtualization**: Docker (Ubuntu 22.04 Tabanlı).
+*   **Desktop**: Xvfb, x11vnc, noVNC, Xfce4/GNOME.
+
+---
+⭐ Projeyi beğendiyseniz yıldız vermeyi unutmayın!
 [GitHub - silent0607/hackterm](https://github.com/silent0607/hackterm)

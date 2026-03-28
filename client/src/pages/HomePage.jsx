@@ -13,6 +13,8 @@ const TOOL_CARDS = [
   { id: 'network', icon: '🔒', title: 'Ağ Güvenliği', desc: 'Netcat dinleyici ve Responder LLMNR/NBT-NS zehirleme', color: 'purple', tags: ['NC', 'Responder', 'NTLMv2'] },
   { id: 'john', icon: '🔑', title: 'John & Hashcat', desc: 'Parola hash kırma araçları', color: 'yellow', tags: ['John', 'Hashcat', 'rockyou'] },
   { id: 'aws', icon: '☁', title: 'AWS', desc: 'AWS CLI ve S3 bucket keşfi, shell yükleme', color: 'cyan', tags: ['S3', 'aws-cli', 'endpoint'] },
+  { id: 'openvpn', icon: '🛡️', title: 'OpenVPN', desc: 'VPN bağlantılarını yönet ve güvenli ağlara eriş', color: 'purple', tags: ['VPN', '.ovpn', 'tun0'] },
+  { id: 'burp', icon: '🐝', title: 'Burp Suite', desc: 'Web uygulama güvenlik testi ve GUI erişimi', color: 'orange', tags: ['Proxy', 'GUI', 'noVNC'] },
   { id: 'grep', icon: '🔎', title: 'Grep', desc: '-r, -i, -E gibi bayraklar ve sızma testi kullanımları', color: 'green', tags: ['-r', '-i', '-E', 'regex'] },
 ];
 

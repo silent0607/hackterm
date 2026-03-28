@@ -3,10 +3,20 @@ services:
   hacktoolbasic:
     build: .
     container_name: hacktoolbasic-app
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
     ports:
-      - "3001:3001"
+      - "${HACKTERM_PORT:-3001}:3001"
+      - "${NOVNC_PORT:-6080}:6080"
     volumes:
       - ./downloads:/app/downloads
+      - .tools:/app/.tools
+      - .ovpn:/app/.ovpn
     environment:
       - NODE_ENV=production
+      - DESKTOP_ENV=${DESKTOP_ENV:-xfce}
+      - NOVNC_PORT=${NOVNC_PORT:-6080}
     restart: unless-stopped
