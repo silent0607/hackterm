@@ -13,6 +13,7 @@ Type=Application
 Name=HackTerm
 Comment=Güvenlik ve Sızma Testi Arayüzü
 Exec=python3 "{GUI_SCRIPT}"
+Icon={os.path.join(DIR_PATH, "logo.png")}
 Terminal=false
 Categories=Utility;Security;
 """
@@ -50,6 +51,7 @@ Set link = ws.CreateShortcut("{path}")
 link.TargetPath = "python"
 link.Arguments = "{GUI_SCRIPT}"
 link.WorkingDirectory = "{DIR_PATH}"
+link.IconLocation = "{os.path.join(DIR_PATH, 'logo.ico')}"
 link.Description = "HackTerm Security Environment"
 link.Save
 """

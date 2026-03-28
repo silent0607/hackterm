@@ -47,6 +47,15 @@ class HackTermApp(tk.Tk):
         style.configure("Title.TLabel", foreground="#10B981", font=("Consolas", 18, "bold"))
         style.configure("Status.TLabel", foreground="#FCD34D", font=("Consolas", 11, "bold"))
 
+        # Simgesini ayarla
+        try:
+            icon_path = os.path.join(DIR_PATH, "logo.png")
+            if os.path.exists(icon_path):
+                img = tk.PhotoImage(file=icon_path)
+                self.iconphoto(False, img)
+        except Exception:
+            pass
+
         self.setup_ui()
         self.refresh_timer()
 
@@ -116,7 +125,13 @@ class HackTermApp(tk.Tk):
         if res1:
             res2 = messagebox.askyesno("Son Onay!", "LÜTFEN DİKKAT!\nİndirilen dosyalar, araçlar ve VPN (.ovpn) kayıtları da diskten silinecektir. Bundan emin misiniz?", icon='warning')
             if res2:
-                cmd = "docker-compose down -v --rmi local && rm -rf downloads .tools .ovpn"
+                # Kısayol yollarını bul ve ekle
+                linux_desk = os.path.expanduser("~/Masaüstü/HackTerm.desktop")
+                linux_desk2 = os.path.expanduser("~/Desktop/HackTerm.desktop")
+                linux_menu = os.path.expanduser("~/.local/share/applications/HackTerm.desktop")
+                win_desk = os.path.expanduser("~/Desktop/HackTerm.lnk")
+                
+                cmd = f"docker-compose down -v --rmi local && rm -rf downloads .tools .ovpn && rm -f '{linux_desk}' '{linux_desk2}' '{linux_menu}' '{win_desk}'"
                 self.run_raw_cmd(cmd, "Makine temizleniyor (SİLİNİYOR)...")
 
     def run_docker_cmd(self, cmd_list):
