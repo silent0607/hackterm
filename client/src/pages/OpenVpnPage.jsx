@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { InfoCard, SectionTitle } from '../components/InfoCard';
 import { Upload, Shield, ShieldOff, Activity, FileCode } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function OpenVpnPage({ onBack }) {
+  const { t } = useLanguage();
   const { socket } = useSocket();
   const [vpnStatus, setVpnStatus] = useState({ active: false, info: '' });
   const [ovpnFiles, setOvpnFiles] = useState([]);
@@ -45,7 +47,7 @@ export default function OpenVpnPage({ onBack }) {
       await fetch('/api/upload', { method: 'POST', body: formData });
       fetchFiles();
     } catch (e) {
-      alert('Yükleme hatası');
+      alert(t('error'));
     } finally {
       setUploading(false);
     }
@@ -74,15 +76,15 @@ export default function OpenVpnPage({ onBack }) {
     <div>
       <div className="page-header">
         <div>
-          <div className="page-header-back" onClick={onBack}>← Ana Menü</div>
-          <div className="page-title">🛡️ <span>OpenVPN</span></div>
-          <div className="page-subtitle">VPN bağlantılarını yönet ve güvenli ağlara eriş.</div>
+          <div className="page-header-back" onClick={onBack}>{t('back_to_menu')}</div>
+          <div className="page-title">🛡️ <span>{t('vpn_title')}</span></div>
+          <div className="page-subtitle">{t('vpn_desc')}</div>
         </div>
       </div>
 
       <div className="grid-2">
         <div>
-          <SectionTitle icon={<Activity size={16} />}>Bağlantı Durumu</SectionTitle>
+          <SectionTitle icon={<Activity size={16} />}>{t('vpn_status')}</SectionTitle>
           <div className={`info-panel ${vpnStatus.active ? 'border-green' : 'border-red'}`} style={{ padding: 20, textAlign: 'center' }}>
             {vpnStatus.active ? (
               <Shield className="text-green" size={48} style={{ marginBottom: 12 }} />
@@ -90,52 +92,52 @@ export default function OpenVpnPage({ onBack }) {
               <ShieldOff className="text-red" size={48} style={{ marginBottom: 12 }} />
             )}
             <div style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 8, color: vpnStatus.active ? 'var(--accent-green)' : 'var(--accent-red)' }}>
-              {vpnStatus.active ? 'Bağlantı Aktif' : 'Bağlı Değil'}
+              {vpnStatus.active ? t('vpn_connected') : t('vpn_disconnected')}
             </div>
             <pre style={{ fontSize: 10, background: 'rgba(0,0,0,0.2)', padding: 10, borderRadius: 4, textAlign: 'left', overflowX: 'auto', maxHeight: 150 }}>
               {vpnStatus.info}
             </pre>
             <div style={{ marginTop: 16 }}>
               {vpnStatus.active ? (
-                <button className="btn btn-red" onClick={handleDisconnect} style={{ width: '100%' }}>Bağlantıyı Kes</button>
+                <button className="btn btn-red" onClick={handleDisconnect} style={{ width: '100%' }}>{t('vpn_disconnect')}</button>
               ) : (
-                <button className="btn btn-green" onClick={handleConnect} disabled={!selectedFile} style={{ width: '100%' }}>Bağlan</button>
+                <button className="btn btn-green" onClick={handleConnect} disabled={!selectedFile} style={{ width: '100%' }}>{t('vpn_connect')}</button>
               )}
             </div>
           </div>
         </div>
 
         <div>
-          <SectionTitle icon={<FileCode size={16} />}>Yapılandırma Dosyaları (.ovpn)</SectionTitle>
+          <SectionTitle icon={<FileCode size={16} />}>{t('vpn_title')} (.ovpn)</SectionTitle>
           <div className="info-panel" style={{ padding: 20 }}>
             <div className="form-group" style={{ marginBottom: 16 }}>
-              <label className="form-label">Yapılandırma Seç</label>
+              <label className="form-label">{t('vpn_select_file')}</label>
               <select className="form-input" value={selectedFile} onChange={e => setSelectedFile(e.target.value)}>
-                <option value="">-- Dosya Seçin --</option>
+                <option value="">{t('vpn_select_file')}</option>
                 {ovpnFiles.map(f => <option key={f} value={f}>{f}</option>)}
               </select>
             </div>
 
             <div style={{ textAlign: 'center' }}>
               <label className="btn btn-cyan" style={{ width: '100%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <Upload size={16} /> {uploading ? 'Yükleniyor...' : '.ovpn Yükle'}
+                <Upload size={16} /> {uploading ? t('loading') : t('vpn_upload')}
                 <input type="file" accept=".ovpn" style={{ display: 'none' }} onChange={handleUpload} disabled={uploading} />
               </label>
             </div>
 
             <div style={{ marginTop: 20, fontSize: 12, color: 'var(--text-muted)' }}>
-              <div style={{ marginBottom: 8 }}><b>İpucu:</b></div>
-              TryHackMe veya HackTheBox gibi platformlardan aldığın <code>.ovpn</code> dosyalarını buradan yükleyip doğrudan konteyner üzerinden ağa bağlanabilirsin.
+              <div style={{ marginBottom: 8 }}><b>{t('de_tip')}:</b></div>
+              {t('vpn_hint')}
             </div>
           </div>
         </div>
       </div>
 
       <div style={{ marginTop: 20 }}>
-        <InfoCard title="OpenVPN Hakkında" icon="ℹ️" color="purple">
+        <InfoCard title={t('vpn_about_title')} icon="ℹ️" color="purple">
           <div className="cmd-desc">
-            OpenVPN bağlantısı kurulduğunda, tüm konteyner trafiği (Terminal, Nmap, Gobuster vb.) VPN üzerinden geçecektir.
-            Bağlantı sorunları yaşıyorsanız terminalden <code>ip addr</code> komutu ile <code>tun0</code> arayüzünün oluşup oluşmadığını kontrol edin.
+            {t('vpn_about_desc')}<br/><br/>
+            {t('vpn_ip_check')}
           </div>
         </InfoCard>
       </div>

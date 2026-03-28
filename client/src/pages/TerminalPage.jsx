@@ -2,12 +2,14 @@ import { useState, useRef, useCallback } from 'react';
 import { Plus, X, Pin, PinOff } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
 import { useTerminal } from '../hooks/useTerminal';
+import { useLanguage } from '../context/LanguageContext';
 
 let termCounter = 0;
 
 function SingleTerm({ id, title, onClose, pinned, onTogglePin }) {
   const containerRef = useRef(null);
   const { isReady } = useTerminal(id, containerRef);
+  const { t } = useLanguage();
 
   return (
     <div className="terminal-window" style={{ minHeight: 280 }}>
@@ -20,18 +22,18 @@ function SingleTerm({ id, title, onClose, pinned, onTogglePin }) {
         <div className="terminal-title">
           {isReady
             ? <span style={{ color: 'var(--accent-green)' }}>● {title}</span>
-            : <span style={{ color: 'var(--text-muted)' }}>○ bağlanıyor...</span>}
+            : <span style={{ color: 'var(--text-muted)' }}>○ {t('connecting')}</span>}
         </div>
         <div style={{ display: 'flex', gap: 4, marginLeft: 'auto' }}>
           <button
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: pinned ? 'var(--accent-green)' : 'var(--text-muted)', padding: 2 }}
-            onClick={onTogglePin} title={pinned ? 'Sabiti Kaldır' : 'Sabitle'}>
+            onClick={onTogglePin} title={pinned ? t('unpin') : t('pin')}>
             {pinned ? <Pin size={11} /> : <PinOff size={11} />}
           </button>
           {!pinned && (
             <button
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2 }}
-              onClick={onClose} title="Kapat">
+              onClick={onClose} title={t('close')}>
               <X size={11} />
             </button>
           )}
@@ -43,6 +45,7 @@ function SingleTerm({ id, title, onClose, pinned, onTogglePin }) {
 }
 
 export default function MultiTerminalPage() {
+  const { t } = useLanguage();
   const [terms, setTerms] = useState(() => {
     termCounter++;
     return [{ id: `term-${termCounter}`, title: 'bash', pinned: true }];
@@ -63,21 +66,21 @@ export default function MultiTerminalPage() {
       <div className="page-header">
         <div>
           <div style={{ display: 'flex', gap: 8, marginBottom: 4 }} className="page-header-back">
-            <span>⬡ Terminal</span>
+            <span>⬡ {t('terminal')}</span>
           </div>
-          <div className="page-title">Terminal <span>Yöneticisi</span></div>
-          <div className="page-subtitle">Yerel bash terminallerini burada yönet. Pin = daima açık.</div>
+          <div className="page-title">{t('terminal_mgr')}</div>
+          <div className="page-subtitle">{t('terminal_desc')}</div>
         </div>
       </div>
 
       <div style={{ display: 'flex', gap: 10, marginBottom: 16, alignItems: 'center' }}>
         <button className="btn btn-green" onClick={addTerm}>
-          <Plus size={13} /> Yeni Terminal
+          <Plus size={13} /> {t('new_terminal')}
         </button>
         <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-secondary)', cursor: 'pointer' }}>
           <input type="checkbox" checked={venv} onChange={e => setVenv(e.target.checked)}
             style={{ accentColor: 'var(--accent-purple)' }} />
-          Sanal ortamda (venv) çalıştır
+          {t('run_in_venv')}
         </label>
       </div>
 

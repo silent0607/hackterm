@@ -52,18 +52,18 @@ export default function HomePage({ onNavigate }) {
             borderRadius: 20, padding: '3px 10px'
           }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: connected ? 'var(--accent-green)' : 'var(--text-muted)', display: 'inline-block' }} />
-            {connected ? 'Sunucu Bağlı' : 'Bağlanıyor...'}
+            {connected ? t('connected') : t('connecting')}
           </div>
         </div>
         <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-          Sızma testi araçlarını tek arayüzden kullan.
+          {t('subtitle')}
           {activeJob ? (
             <span style={{ color: 'var(--accent-green)', marginLeft: 8 }}>
-              Aktif iş: <b>{activeJob.name}</b> {activeJob.ip && `→ ${activeJob.ip}`}
+              {t('active_jobs')}: <b>{activeJob.name}</b> {activeJob.ip && `→ ${activeJob.ip}`}
             </span>
           ) : (
             <span style={{ color: 'var(--accent-orange)', marginLeft: 8 }}>
-              Sol menüden bir iş oluşturup IP gir.
+              {t('no_active_jobs')}
             </span>
           )}
         </div>

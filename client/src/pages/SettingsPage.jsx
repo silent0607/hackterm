@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Settings, Layout, CheckCircle2, Circle, Loader2, PlayCircle, MonitorStop } from 'lucide-react';
 import { SectionTitle, InfoCard } from '../components/InfoCard';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function SettingsPage() {
+  const { t } = useLanguage();
   const [status, setStatus] = useState({ xfce: false, gnome: false });
   const [loading, setLoading] = useState(false);
   const [installingType, setInstallingType] = useState(null);
@@ -25,7 +27,7 @@ export default function SettingsPage() {
   const handleInstall = async (type) => {
     setLoading(true);
     setInstallingType(type);
-    setMessage(type === 'xfce' ? 'Xfce4 masaüstü kuruluyor...' : 'GNOME masaüstü kuruluyor...');
+    setMessage(type === 'xfce' ? `${t('xfce_desc')} ${t('installing')}` : `${t('gnome_desc')} ${t('installing')}`);
     
     try {
       const res = await fetch('/api/desktop/install', {
@@ -36,7 +38,7 @@ export default function SettingsPage() {
       const data = await res.json();
       setMessage(data.message);
     } catch (e) {
-      setMessage('Hata: Kurulum başlatılamadı.');
+      setMessage(`error: ${t('error')}`);
     } finally {
       setLoading(false);
     }
@@ -46,18 +48,17 @@ export default function SettingsPage() {
     <div>
       <div className="page-header">
         <div>
-          <div className="page-title"><Settings size={24} /> <span>Sistem Ayarları</span></div>
-          <div className="page-subtitle">Docker üzerindeki masaüstü ve GUI ortamlarını yönetin.</div>
+          <div className="page-title"><Settings size={24} /> <span>{t('system_settings')}</span></div>
+          <div className="page-subtitle">{t('desktop_mgmt')}</div>
         </div>
       </div>
 
       <div className="grid-2">
         <div>
-          <SectionTitle icon={<Layout size={18} />}>Masaüstü Ortamları (DE)</SectionTitle>
+          <SectionTitle icon={<Layout size={18} />}>{t('de_title')}</SectionTitle>
           <div className="info-panel" style={{ padding: 20 }}>
             <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
-              Sistem başlangıçta sadece minimal <b>Openbox</b> Pencere Yöneticisi ile açılır. 
-              İhtiyaç duyduğunuzda aşağıdaki ortamları sonradan kurabilirsiniz.
+              {t('de_desc')}
             </p>
 
             <div className="desktop-card" style={{ 
@@ -72,12 +73,12 @@ export default function SettingsPage() {
             }}>
               <div>
                 <b style={{ color: 'var(--accent-cyan)' }}>Xfce4 Desktop</b>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Hafif, stabil ve hızlı.</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('xfce_desc')}</div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 {status.xfce ? (
                   <span style={{ color: 'var(--accent-green)', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
-                    <CheckCircle2 size={14} /> Kurulu
+                    <CheckCircle2 size={14} /> {t('installed')}
                   </span>
                 ) : (
                   <button 
@@ -85,7 +86,7 @@ export default function SettingsPage() {
                     onClick={() => handleInstall('xfce')}
                     disabled={loading}
                   >
-                    {loading && installingType === 'xfce' ? <Loader2 size={12} className="spin" /> : 'Yükle'}
+                    {loading && installingType === 'xfce' ? <Loader2 size={12} className="spin" /> : t('install')}
                   </button>
                 )}
               </div>
@@ -102,12 +103,12 @@ export default function SettingsPage() {
             }}>
               <div>
                 <b style={{ color: 'var(--accent-cyan)' }}>GNOME Flashback</b>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Modern ve kullanımı kolay.</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('gnome_desc')}</div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 {status.gnome ? (
                   <span style={{ color: 'var(--accent-green)', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
-                    <CheckCircle2 size={14} /> Kurulu
+                    <CheckCircle2 size={14} /> {t('installed')}
                   </span>
                 ) : (
                   <button 
@@ -115,7 +116,7 @@ export default function SettingsPage() {
                     onClick={() => handleInstall('gnome')}
                     disabled={loading}
                   >
-                    {loading && installingType === 'gnome' ? <Loader2 size={12} className="spin" /> : 'Yükle'}
+                    {loading && installingType === 'gnome' ? <Loader2 size={12} className="spin" /> : t('install')}
                   </button>
                 )}
               </div>
@@ -138,11 +139,11 @@ export default function SettingsPage() {
         </div>
 
         <div>
-           <InfoCard title="Masaüstü Durumu" icon="🖥️" color="purple">
+           <InfoCard title={t('de_status_title')} icon="🖥️" color="purple">
               <div className="cmd-desc">
                 <b>Mevcut WM:</b> Openbox (Aktif)<br/><br/>
-                <b>İpucu:</b> Bir masaüstü ortamı kurduktan sonra, masaüstünü (noVNC) yeniden yüklemeniz veya docker konteynerini bir kez <code>restart</code> etmeniz gerekebilir.<br/><br/>
-                <b>Dikkat:</b> GNOME kurulumu disk üzerinden ~1GB yer kaplar ve uzun sürebilir.
+                <b>İpucu:</b> {t('de_tip')}<br/><br/>
+                <b>Dikkat:</b> {t('de_warning')}
               </div>
            </InfoCard>
         </div>

@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { InfoCard, SectionTitle } from '../components/InfoCard';
 import { Monitor, Upload, Play, Package, ExternalLink, ShieldCheck } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function BurpPage({ onBack }) {
+  const { t } = useLanguage();
   const { socket } = useSocket();
   const [burpStatus, setBurpStatus] = useState({ installed: false });
   const [shFiles, setShFiles] = useState([]);
-  const [envInfo, setEnvInfo] = useState({ novncPort: '6080', desktopEnv: 'xfce' });
+  const [envInfo, setEnvInfo] = useState({ novncPort: '6080', desktopEnv: 'xfce', desktopPath: '/desktop' });
   const [selectedFile, setSelectedFile] = useState('');
   const [installing, setInstalling] = useState(false);
   const [running, setRunning] = useState(false);
@@ -42,7 +44,6 @@ export default function BurpPage({ onBack }) {
     fetchEnv();
   }, []);
 
-  // desktopPath is something like "/desktop"
   const vncUrl = `http://${window.location.hostname}:${envInfo.novncPort}${envInfo.desktopPath}/vnc.html?host=${window.location.hostname}&port=${envInfo.novncPort}&autoconnect=true`;
 
   const handleUpload = async (e) => {
@@ -54,7 +55,7 @@ export default function BurpPage({ onBack }) {
     try {
       await fetch('/api/upload', { method: 'POST', body: formData });
       fetchFiles();
-    } catch (e) { alert('Upload hatası'); }
+    } catch (e) { alert(t('error')); }
   };
 
   const handleInstall = async () => {
@@ -81,39 +82,39 @@ export default function BurpPage({ onBack }) {
     <div>
       <div className="page-header">
         <div>
-          <div className="page-header-back" onClick={onBack}>← Ana Menü</div>
-          <div className="page-title">🐝 <span>Burp Suite</span></div>
-          <div className="page-subtitle">Web uygulama güvenlik testi aracı.</div>
+          <div className="page-header-back" onClick={onBack}>{t('back_to_menu')}</div>
+          <div className="page-title">🐝 <span>{t('burp_title')}</span></div>
+          <div className="page-subtitle">{t('burp_desc')}</div>
         </div>
       </div>
 
       <div className="grid-2">
         <div>
-          <SectionTitle icon={<Package size={16} />}>Kurulum & Çalıştırma</SectionTitle>
+          <SectionTitle icon={<Package size={16} />}>{t('install_run')}</SectionTitle>
           <div className="info-panel" style={{ padding: 20 }}>
             {burpStatus.installed ? (
               <div style={{ textAlign: 'center' }}>
                 <div style={{ color: 'var(--accent-green)', fontWeight: 'bold', marginBottom: 16 }}>
-                  ✅ Burp Suite Kurulu
+                  ✅ {t('burp_installed')}
                 </div>
                 <button className="btn btn-green" onClick={handleRun} disabled={running} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                  <Play size={16} /> {running ? 'Başlatılıyor...' : 'Burp Suite Çalıştır'}
+                  <Play size={16} /> {running ? t('burp_running') : t('burp_run')}
                 </button>
               </div>
             ) : (
               <div style={{ textAlign: 'center' }}>
                 <div style={{ color: 'var(--accent-orange)', fontWeight: 'bold', marginBottom: 16 }}>
-                  ⚠️ Burp Suite Kurulu Değil
+                  ⚠️ {t('burp_not_installed')}
                 </div>
                 <select className="form-input" style={{ marginBottom: 12 }} value={selectedFile} onChange={e => setSelectedFile(e.target.value)}>
-                  <option value="">-- .sh Kurulum Dosyası Seçin --</option>
+                  <option value="">{t('burp_select_sh')}</option>
                   {shFiles.map(f => <option key={f} value={f}>{f}</option>)}
                 </select>
                 <button className="btn btn-cyan" onClick={handleInstall} disabled={installing || !selectedFile} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                  <Package size={16} /> {installing ? 'Kuruluyor...' : 'Yükle ve Kur'}
+                  <Package size={16} /> {installing ? t('burp_installing') : t('burp_install_btn')}
                 </button>
                 <label className="btn btn-ghost" style={{ width: '100%', marginTop: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                  <Upload size={16} /> .sh Installer Yükle
+                  <Upload size={16} /> {t('burp_upload')}
                   <input type="file" accept=".sh" style={{ display: 'none' }} onChange={handleUpload} />
                 </label>
               </div>
@@ -122,28 +123,28 @@ export default function BurpPage({ onBack }) {
         </div>
 
         <div>
-          <SectionTitle icon={<Monitor size={16} />}>Grafik Arayüz (Desktop)</SectionTitle>
+          <SectionTitle icon={<Monitor size={16} />}>{t('gui_desktop')}</SectionTitle>
           <div className="info-panel" style={{ padding: 20 }}>
             <div style={{ textAlign: 'center', marginBottom: 16 }}>
-              Burp Suite ve Firefox arayüzlerine erişmek için dahili masaüstü bağlantısını kullan:
+              {t('desktop_access_desc')}
             </div>
             <a href={vncUrl} target="_blank" className="btn btn-purple" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-              <ExternalLink size={16} /> Masaüstünü Aç (noVNC)
+              <ExternalLink size={16} /> {t('desktop_open')}
             </a>
             
             <div style={{ marginTop: 24 }}>
-              <SectionTitle icon={<ShieldCheck size={14} />}>Burp CA Sertifikası</SectionTitle>
+              <SectionTitle icon={<ShieldCheck size={14} />}>{t('burp_ca_title')}</SectionTitle>
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
-                <p style={{ fontSize: 12, marginBottom: 8 }}>Burp proxy ile HTTPS trafiğini dinlemek için CA sertifikasını yükle:</p>
+                <p style={{ fontSize: 12, marginBottom: 8 }}>{t('burp_ca_desc')}</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                    <a href={vncUrl} target="_blank" className="btn btn-xs btn-ghost" style={{ width: '100%' }}>
-                     1. Firefox'u Aç (VNC üzerinden)
+                     {t('firefox_open')}
                    </a>
                    <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                     2. Firefox'ta <code>http://burp</code> adresine git.
+                     {t('go_to_burp')}
                    </div>
                    <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                     3. 'CA Certificate' indir ve Firefox ayarlarına (Certificates) aktar.
+                     {t('import_cert')}
                    </div>
                 </div>
               </div>
@@ -153,11 +154,11 @@ export default function BurpPage({ onBack }) {
       </div>
 
       <div style={{ marginTop: 20 }}>
-        <InfoCard title="Kullanım Rehberi" icon="💡" color="cyan">
+        <InfoCard title={t('usage_guide')} icon="💡" color="cyan">
           <div className="cmd-desc">
-            <b>1. Firefox & Burp</b>: Konteyner içindeki Firefox, varsayılan olarak <code>127.0.0.1:8080</code> (Burp Proxy) adresine yönlendirilmiş durumdadır.<br/><br/>
-            <b>2. Sertifika</b>: HTTPS trafiğini görebilmek için Burp sertifikasını Firefox'a bir kez eklemen yeterlidir.<br/><br/>
-            <b>3. Masaüstü Erişimi</b>: 'Masaüstünü Aç' butonu ile tam teşekküllü bir Ubuntu masaüstüne (<b>{envInfo.desktopEnv.toUpperCase()}</b>) ulaşırsın. Burp Suite'i oradan kontrol edebilirsin.
+            <b>1. Firefox & Burp</b>: {t('guide_1')}<br/><br/>
+            <b>2. {t('burp_ca_title')}</b>: {t('guide_2')}<br/><br/>
+            <b>3. {t('gui_desktop')}</b>: {t('guide_3')}
           </div>
         </InfoCard>
       </div>

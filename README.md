@@ -1,87 +1,68 @@
-# 🛡️ HackTerm (HackTool Basic) - Gelişmiş Güvenlik Terminali
+# 🛡️ HackTerm (HackTool Basic) - Advanced Security Terminal
 
-**HackTerm**, sızma testi süreçlerini otomatize etmek, yaygın kullanılan güvenlik araçlarını merkezi bir web arayüzünden yönetmek ve grafik arayüzlü (GUI) araçları tarayıcı üzerinden kullanmak için tasarlanmış profesyonel bir sızma testi platformudur.
+**HackTerm** is a professional penetration testing platform designed to automate security workflows, manage security tools from a centralized web dashboard, and run GUI-based hacking tools directly through your browser. 
 
----
-
-## ⚠️ Yasal Uyarı / Legal Disclaimer
-
-### [ TR ]
-**ÖNEMLİ:** Bu araç sadece **etik hacking**, güvenlik araştırmaları ve yasal sızma testi süreçleri için geliştirilmiştir. 
-*   Bu aracın yetkisiz sistemlere karşı kullanılması **yasa dışıdır**.
-*   Geliştiriciler, bu aracın yanlış kullanımından hiçbir şekilde **sorumlu tutulamaz**.
-
-### [ EN ]
-**IMPORTANT:** This tool is developed for **ethical hacking**, security research, and legal penetration testing only.
-*   The use of this tool against unauthorized systems is **illegal**.
-*   The developers cannot be held **responsible** for any misuse or damage caused by this tool.
+Read this in [Turkish (Türkçe)](README-TR.md)
 
 ---
 
-## 🔥 Temel Özellikler
+## ⚠️ Legal Disclaimer
 
-*   **🖥️ Çift Masaüstü Desteği**: Konteyner içinde **Xfce** veya **GNOME** masaüstü ortamlarını noVNC üzerinden tarayıcıda çalıştırabilme.
-*   **🐝 Burp Suite Entegrasyonu**: Tek tıkla Burp Suite kurulumu, Firefox ile tam uyumlu proxy ve sertifika yönetimi.
-*   **🛡️ OpenVPN Yönetimi**: `.ovpn` yapılandırmalarını web arayüzünden yükleyip tüm konteyner trafiğini VPN üzerinden geçirme.
-*   **🐚 Etkileşimli Terminaller**: PTY destekli yerel terminaller ve uzak SSH bağlantıları.
-*   **🛠️ Entegre Güvenlik Araçları**: Nmap, John the Ripper, Impacket, Gobuster, SQL araçları ve daha fazlası.
-*   **📁 FTP & Dosya Takibi**: `downloads` dizinine düşen dosyaları gerçek zamanlı izleme ve indirme.
-*   **⚙️ Dinamik Yapılandırma**: Portları ve GUI ortamını `.env` dosyası üzerinden kolayca değiştirme.
+> [!IMPORTANT]
+> **IMPORTANT:** This tool is developed strictly for **ethical hacking**, security research, and legal penetration testing on systems you own or have explicit permission to test.
+> *   Any use of this tool against unauthorized systems is strictly **illegal**.
+> *   The developers and maintainers of this repository **cannot be held responsible** for any misuse, damage, or illegal activities conducted using this tool.
 
 ---
 
-## 🚀 Kurulum ve Başlatma
+## 🔥 Key Features
 
-### 🔗 Uzak Sunucu (Server) veya Yerel Kurulum / Remote or Local Deployment
+*   **🌍 Bilingual Interface**: Full dynamic language support switching seamlessly between English and Turkish.
+*   **🌐 Flexible Deployment**: Whether on your **own local computer** or hosted remotely on a **Cloud Server (VPS)**, you can effortlessly install it anywhere and securely conduct your penetration tests globally.
+*   **🖥️ On-Demand Desktop Environment**: Starts incredibly fast with a minimal `Openbox` setup. You optionally install heavier environments like **Xfce** or **GNOME** dynamically *only when you need them* via the Settings menu.
+*   **🐝 Web-Based GUI Tools (Burp Suite & Firefox)**: Easily launch and manage tools like Burp Suite and a pre-configured, proxy-ready Firefox directly in the browser through noVNC.
+*   **🛡️ OpenVPN Integration**: Upload your `.ovpn` files directly from the UI to seamlessly encrypt and route all container traffic through your VPN tunnel (great for TryHackMe, HackTheBox, etc.).
+*   **🐚 Interactive Terminal Manager**: Manage multiple `PTY` powered terminal tabs simultaneously with history and background process support.
+*   **📁 Active Recon & Exploitation Modules**: Includes localized tooling interfaces for Nmap scans, FTP monitoring, Directory Busting (Gobuster), PHP Web Shell & Reverse Shell generation, Netcat listeners, and Responder.
 
-[ TR ]
-HackTerm, hem yerel makinenizde hem de uzak bir VPS/Server üzerinde çalışacak şekilde optimize edilmiştir. Bu sayede güvenlik testlerinizi dilediğiniz ortamdan gerçekleştirebilirsiniz.
+---
 
-[ EN ]
-HackTerm is optimized to run both on your local machine and on a remote VPS/Server. This allows you to perform your security tests from any environment you prefer.
+## 🚀 Installation & Deployment
 
-#### 1. Depoyu Klonlayın
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/silent0607/hackterm.git
 cd hackterm
 ```
 
-#### 2. Yapılandırma (.env)
-Kendi portlarınızı ve masaüstü tercihinizi belirlemek için `.env` dosyasını düzenleyin:
+### 2. Configure Environment Variable (.env)
+Edit the `.env` file to set your preferred port and the secret VNC path.
 ```env
-HACKTERM_PORT=3001   # Ana web arayüzü
-NOVNC_PORT=6080      # Masaüstü (noVNC) erişimi
-DESKTOP_ENV=xfce     # xfce veya gnome
+HACKTERM_PORT=3001
+DESKTOP_PATH=/desktop  # Your dynamic noVNC URL slug for security
 ```
 
-#### 3. Docker ile Çalıştırın
+### 3. Start with Docker
+The entire system functions within an isolated Docker container with zero dependency bloat on your host system.
 ```bash
 docker-compose up --build -d
 ```
-Uygulamanıza `http://ip-adresiniz:3001` (veya belirlediğiniz port) üzerinden erişebilirsiniz.
+Access the dashboard at `http://your-server-ip:3001`.
 
 ---
 
-## 📟 Masaüstü Yöneticisi (Launcher)
-
-Yerel kullanımda kolaylık sağlaması için `launcher.py` scriptini kullanabilirsiniz:
-*   **Bağlan/Başlat**: Sistemi otomatik açar ve tarayıcıya yönlendirir.
-*   **Terminal**: Konteynere SSH atmadan doğrudan Ubuntu shell'ine yeni bir pencerede bağlanır.
-*   **Temizle**: Tüm volume'ları ve yüklü araçları silerek sistemi sıfırlar.
-
+## 📟 Launching the Local GUI (Optional)
+If you're running this strictly on your local machine and want an immediate web wrapper, simply use the provided Python launcher:
 ```bash
 python3 launcher.py
 ```
 
 ---
 
-## 🛠️ Teknoloji Yığını
+## 🛠️ Technology Stack
+*   **Frontend**: React (Vite), Tailwind Style Utilities, Context-based I18n.
+*   **Backend**: Node.js (Express), Socket.io, Node-pty.
+*   **Docker Container**: Ubuntu 22.04 Privileged, Xvfb, noVNC, Openbox.
+*   **Integrated Security Tools**: Burp Suite, OpenVPN, Nmap, Gobuster, Netcat, Responder.
 
-*   **Backend**: Node.js, Express, Socket.io, Multer, node-pty.
-*   **Frontend**: React, Vite, Lucide-React, xterm.js.
-*   **Virtualization**: Docker (Ubuntu 22.04 Tabanlı).
-*   **Desktop**: Xvfb, x11vnc, noVNC, Xfce4/GNOME.
-
----
-⭐ Projeyi beğendiyseniz yıldız vermeyi unutmayın!
-[GitHub - silent0607/hackterm](https://github.com/silent0607/hackterm)
+⭐ Don't forget to star the repo if you like it! [GitHub - silent0607/hackterm](https://github.com/silent0607/hackterm)

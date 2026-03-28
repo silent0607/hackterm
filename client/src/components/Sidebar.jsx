@@ -1,28 +1,39 @@
 import { useState } from 'react';
-import { Plus, Trash2, Terminal, FileText } from 'lucide-react';
+import { 
+  Plus, 
+  Trash2, 
+  Terminal, 
+  FileText, 
+  Search, 
+  FolderTree, 
+  Database, 
+  Shield, 
+  Cpu, 
+  ChevronRight, 
+  Network, 
+  Settings,
+  Languages,
+  Home,
+  Code,
+  Database as DbIcon,
+} from 'lucide-react';
 import { useJobs } from '../context/JobContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const NAV_ITEMS = [
-  { id: 'home',       label: 'Ana Menü',       icon: '⌂' },
-  { id: 'terminal',   label: 'Terminal',        icon: '⬡' },
-  { id: 'ftp',        label: 'FTP',             icon: '📁' },
-  { id: 'nmap',       label: 'Nmap',            icon: '🔍' },
-  { id: 'windows',    label: 'Windows',         icon: '🪟' },
-  { id: 'redis',      label: 'Redis',           icon: '🗄' },
-  { id: 'gobuster',   label: 'Gobuster',        icon: '🌐' },
-  { id: 'sql',        label: 'SQL',             icon: '💉' },
-  { id: 'phpshell',   label: 'PHP Shell',       icon: '🐚' },
-  { id: 'network',    label: 'Ağ Güvenliği',    icon: '🔒' },
-  { id: 'john',       label: 'John & Hashcat',  icon: '🔑' },
-  { id: 'aws',        label: 'AWS',             icon: '☁' },
-  { id: 'openvpn',    label: 'OpenVPN',         icon: '🛡️' },
-  { id: 'burp',       label: 'Burp Suite',      icon: '🐝' },
-  { id: 'grep',       label: 'Grep',            icon: '🔎' },
-  { id: 'settings',   label: 'Ayarlar',         icon: '⚙️' },
+  { id: 'home',       label: 'home',       icon: <Home size={18} /> },
+  { id: 'terminal',   label: 'terminal',        icon: <Code size={18} /> },
+  { id: 'ftp',        label: 'ftp',             icon: <FolderTree size={18} /> },
+  { id: 'nmap',       label: 'nmap',            icon: <Search size={18} /> },
+  { id: 'redis',      label: 'redis',           icon: <DbIcon size={18} /> },
+  { id: 'openvpn',    label: 'openvpn',         icon: <Shield size={18} /> },
+  { id: 'burp',       label: 'burp',      icon: <Cpu size={18} /> },
+  { id: 'settings',   label: 'settings',         icon: <Settings size={18} /> },
 ];
 
 export default function Sidebar({ currentPage, onNavigate }) {
   const { jobs, activeJob, activeJobId, setActiveJobId, addJob, updateJob, deleteJob, notes, saveNotes } = useJobs();
+  const { language, setLanguage, t } = useLanguage();
   const [editingJobId, setEditingJobId] = useState(null);
   const [newJobModal, setNewJobModal] = useState(false);
   const [newName, setNewName] = useState('');
@@ -40,15 +51,15 @@ export default function Sidebar({ currentPage, onNavigate }) {
       {/* Jobs Section */}
       <div className="sidebar-section" style={{ padding: '12px 8px 8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', padding: '0 8px 6px', justifyContent: 'space-between' }}>
-          <span className="sidebar-section-label" style={{ padding: 0 }}>İşler</span>
+          <span className="sidebar-section-label" style={{ padding: 0 }}>{t('jobs')}</span>
           <button className="btn btn-xs btn-green" onClick={() => setNewJobModal(true)}>
-            <Plus size={10} /> Yeni
+            <Plus size={10} /> {t('new_job')}
           </button>
         </div>
         <div style={{ maxHeight: 120, overflowY: 'auto' }}>
           {jobs.length === 0 && (
             <div style={{ padding: '4px 12px', fontSize: 11, color: 'var(--text-muted)' }}>
-              İş yok – Yeni ekle
+              {t('no_jobs')}
             </div>
           )}
           {jobs.map(job => (
@@ -90,9 +101,9 @@ export default function Sidebar({ currentPage, onNavigate }) {
               <input
                 className="form-input"
                 style={{ border: 'none', padding: '0 4px', fontSize: 12, background: 'transparent', height: 'auto' }}
-                placeholder="Hedef IP..."
+                placeholder={t('target_ip_label')}
                 value={activeJob.ip || ''}
-                onChange={e => updateJob(activeJob.id, { ip: e.target.value })}
+                onChange={e => updateJob(activeJob.ip, { ip: e.target.value })}
               />
             </div>
           </div>
@@ -103,21 +114,21 @@ export default function Sidebar({ currentPage, onNavigate }) {
       {newJobModal && (
         <div className="modal-overlay" onClick={() => setNewJobModal(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-title">⬡ Yeni İş</div>
+            <div className="modal-title">⬡ {t('new_job')}</div>
             <div className="form-group" style={{ marginBottom: 12 }}>
-              <label className="form-label">İş Adı</label>
+              <label className="form-label">{t('job_name_label')}</label>
               <input className="form-input" value={newName} onChange={e => setNewName(e.target.value)}
                 placeholder="Hedef Makine 1" autoFocus />
             </div>
             <div className="form-group">
-              <label className="form-label">Hedef IP (opsiyonel)</label>
+              <label className="form-label">{t('target_ip_label')}</label>
               <input className="form-input" value={newIp} onChange={e => setNewIp(e.target.value)}
                 placeholder="10.10.10.10"
                 onKeyDown={e => e.key === 'Enter' && handleAddJob()} />
             </div>
             <div className="modal-actions">
-              <button className="btn btn-ghost" onClick={() => setNewJobModal(false)}>İptal</button>
-              <button className="btn btn-green" onClick={handleAddJob}><Plus size={14} /> Oluştur</button>
+              <button className="btn btn-ghost" onClick={() => setNewJobModal(false)}>{t('cancel')}</button>
+              <button className="btn btn-green" onClick={handleAddJob}><Plus size={14} /> {t('create')}</button>
             </div>
           </div>
         </div>
@@ -125,28 +136,36 @@ export default function Sidebar({ currentPage, onNavigate }) {
 
       {/* Navigation */}
       <nav className="sidebar-nav">
-        <div className="sidebar-section-label">Araçlar</div>
+        <div className="sidebar-section-label">{t('tools')}</div>
         {NAV_ITEMS.map(item => (
           <div key={item.id}
             className={`sidebar-item ${currentPage === item.id ? 'active' : ''}`}
             onClick={() => onNavigate(item.id)}>
             <span className="sidebar-item-icon">{item.icon}</span>
-            <span>{item.label}</span>
+            <span>{t(item.label)}</span>
           </div>
         ))}
       </nav>
 
-      {/* Notes */}
-      <div className="notes-area">
-        <div className="notes-header">
-          <FileText size={11} /> Not Tut
+      {/* Language Switcher */}
+      <div className="sidebar-footer">
+        <div className="lang-switcher" onClick={setLanguage}>
+          <Languages size={14} />
+          <span>{language === 'tr' ? 'TR | EN' : 'EN | TR'}</span>
         </div>
-        <textarea
-          className="notes-textarea"
-          placeholder="Buraya notlarını yaz..."
-          value={notes}
-          onChange={e => saveNotes(e.target.value)}
-        />
+        
+        {/* Notes */}
+        <div className="notes-area">
+          <div className="notes-header">
+            <FileText size={11} /> {t('notes')}
+          </div>
+          <textarea
+            className="notes-textarea"
+            placeholder={t('notes_placeholder')}
+            value={notes}
+            onChange={e => saveNotes(e.target.value)}
+          />
+        </div>
       </div>
     </div>
   );
