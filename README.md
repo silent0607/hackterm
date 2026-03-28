@@ -4,12 +4,17 @@
 
 ---
 
-## ⚠️ Yasal Uyarı ve Sorumluluk Reddi (Legal Disclaimer)
+## ⚠️ Yasal Uyarı / Legal Disclaimer
 
+### [ TR ]
 **ÖNEMLİ:** Bu araç sadece **etik hacking**, güvenlik araştırmaları ve yasal sızma testi süreçleri için geliştirilmiştir. 
-*   Bu aracın yetkisiz sistemlere karşı kullanılması **yasa dışıdır** ve ciddi hukuki sonuçlar doğurabilir.
-*   Geliştiriciler, bu aracın yanlış kullanımından veya yol açabileceği zararlardan hiçbir şekilde **sorumlu tutulamaz**.
-*   Bu yazılımı kullanarak, tüm sorumluluğun size ait olduğunu ve yerel/uluslararası yasalar çerçevesinde hareket edeceğinizi kabul etmiş sayılırsınız.
+*   Bu aracın yetkisiz sistemlere karşı kullanılması **yasa dışıdır**.
+*   Geliştiriciler, bu aracın yanlış kullanımından hiçbir şekilde **sorumlu tutulamaz**.
+
+### [ EN ]
+**IMPORTANT:** This tool is developed for **ethical hacking**, security research, and legal penetration testing only.
+*   The use of this tool against unauthorized systems is **illegal**.
+*   The developers cannot be held **responsible** for any misuse or damage caused by this tool.
 
 ---
 
