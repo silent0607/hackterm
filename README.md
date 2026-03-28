@@ -32,9 +32,13 @@
 
 ## 🚀 Kurulum ve Başlatma
 
-### 🔗 Uzak Sunucu (Server) veya Yerel Kurulum
+### 🔗 Uzak Sunucu (Server) veya Yerel Kurulum / Remote or Local Deployment
 
-HackTerm, hem yerel makinenizde hem de uzak bir VPS/Server üzerinde çalışacak şekilde optimize edilmiştir.
+[ TR ]
+HackTerm, hem yerel makinenizde hem de uzak bir VPS/Server üzerinde çalışacak şekilde optimize edilmiştir. Bu sayede güvenlik testlerinizi dilediğiniz ortamdan gerçekleştirebilirsiniz.
+
+[ EN ]
+HackTerm is optimized to run both on your local machine and on a remote VPS/Server. This allows you to perform your security tests from any environment you prefer.
 
 #### 1. Depoyu Klonlayın
 ```bash
