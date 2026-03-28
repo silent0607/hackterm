@@ -62,14 +62,14 @@ export default function MultiTerminalPage() {
   const togglePin = (id) => setTerms(p => p.map(t => t.id === id ? { ...t, pinned: !t.pinned } : t));
 
   return (
-    <div>
+    <div style={{ paddingBottom: 40 }}>
       <div className="page-header">
         <div>
           <div style={{ display: 'flex', gap: 8, marginBottom: 4 }} className="page-header-back">
             <span>⬡ {t('terminal')}</span>
           </div>
-          <div className="page-title">{t('terminal_mgr')}</div>
-          <div className="page-subtitle">{t('terminal_desc')}</div>
+          <h1 className="page-title">{t('terminal_mgr')}</h1>
+          <p className="page-subtitle">{t('terminal_desc')}</p>
         </div>
       </div>
 

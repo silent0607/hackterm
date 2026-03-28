@@ -4,6 +4,7 @@ import { useSocket } from '../context/SocketContext';
 import { useTerminal } from '../hooks/useTerminal';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
+import { useLanguage } from '../context/LanguageContext';
 
 const termId = 'nmap-main';
 
@@ -27,6 +28,7 @@ function NmapTerminal() {
 
 export default function NmapPage({ onBack }) {
   const { activeJob, updateJob } = useJobs();
+  const { t } = useLanguage();
   const { socket } = useSocket();
   const [ip, setIp] = useState(activeJob?.ip || '');
   const [ports, setPorts] = useState('');
