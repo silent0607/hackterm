@@ -22,7 +22,7 @@ import { useLanguage } from '../context/LanguageContext';
 
 const NAV_ITEMS = [
   { id: 'home',       label: 'home',       icon: <Home size={18} /> },
-  { id: 'terminal',   label: 'terminal',        icon: <Code size={18} /> },
+  { id: 'terminal',   label: 'terminal',        icon: <Terminal size={18} /> },
   { id: 'ftp',        label: 'ftp',             icon: <FolderTree size={18} /> },
   { id: 'nmap',       label: 'nmap',            icon: <Search size={18} /> },
   { id: 'redis',      label: 'redis',           icon: <DbIcon size={18} /> },

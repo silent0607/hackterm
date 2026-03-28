@@ -3,20 +3,20 @@ import { useSocket } from '../context/SocketContext';
 import { useLanguage } from '../context/LanguageContext';
 
 const TOOL_CARDS = [
-  { id: 'terminal', icon: '⬡', title: 'Terminal', desc: 'Yerel veya uzak (SSH/Docker) terminaller aç, yönet', color: 'green', tags: ['PTY', 'SSH', 'Docker'] },
-  { id: 'ftp', icon: '📁', title: 'FTP', desc: 'FTP sunucusuna bağlan, dosya indir/yükle', color: 'cyan', tags: ['FTP', 'mget', 'AnonymousLogin'] },
-  { id: 'nmap', icon: '🔍', title: 'Nmap', desc: 'Hızlı port tarama ve servis/versiyon tespiti', color: 'green', tags: ['Port Scan', 'Service', 'NSE'] },
-  { id: 'windows', icon: '🪟', title: 'Windows', desc: 'SMBclient, Evil-WinRM ve MSSQL araçları', color: 'orange', tags: ['SMB', 'WinRM', 'MSSQL'] },
-  { id: 'redis', icon: '🗄', title: 'Redis', desc: 'Redis CLI ile veritabanına bağlan ve keşfet', color: 'red', tags: ['redis-cli', 'KEYS', 'CONFIG'] },
-  { id: 'gobuster', icon: '🌐', title: 'Gobuster', desc: 'Web dizin ve alt domain keşfi (brute force)', color: 'purple', tags: ['dir', 'dns', 'wordlist'] },
-  { id: 'sql', icon: '💉', title: 'SQL', desc: 'MySQL/MariaDB bağlantısı ve SQL Injection referansı', color: 'yellow', tags: ['MySQL', 'MariaDB', 'SQLi'] },
-  { id: 'phpshell', icon: '🐚', title: 'PHP Shell', desc: 'Reverse shell yöntemleri ve web shell oluşturma', color: 'red', tags: ['NC', 'bash', 'python3', 'pty'] },
-  { id: 'network', icon: '🔒', title: 'Ağ Güvenliği', desc: 'Netcat dinleyici ve Responder LLMNR/NBT-NS zehirleme', color: 'purple', tags: ['NC', 'Responder', 'NTLMv2'] },
-  { id: 'john', icon: '🔑', title: 'John & Hashcat', desc: 'Parola hash kırma araçları', color: 'yellow', tags: ['John', 'Hashcat', 'rockyou'] },
-  { id: 'aws', icon: '☁', title: 'AWS', desc: 'AWS CLI ve S3 bucket keşfi, shell yükleme', color: 'cyan', tags: ['S3', 'aws-cli', 'endpoint'] },
-  { id: 'openvpn', icon: '🛡️', title: 'OpenVPN', desc: 'VPN bağlantılarını yönet ve güvenli ağlara eriş', color: 'purple', tags: ['VPN', '.ovpn', 'tun0'] },
-  { id: 'burp', icon: '🐝', title: 'Burp Suite', desc: 'Web uygulama güvenlik testi ve GUI erişimi', color: 'orange', tags: ['Proxy', 'GUI', 'noVNC'] },
-  { id: 'grep', icon: '🔎', title: 'Grep', desc: '-r, -i, -E gibi bayraklar ve sızma testi kullanımları', color: 'green', tags: ['-r', '-i', '-E', 'regex'] },
+  { id: 'terminal', icon: '⬡', title: 'Terminal', desc: 'c_term_desc', color: 'green', tags: ['PTY', 'Ubuntu', 'Docker'] },
+  { id: 'ftp', icon: '📁', title: 'FTP', desc: 'c_ftp_desc', color: 'cyan', tags: ['FTP', 'mget', 'AnonymousLogin'] },
+  { id: 'nmap', icon: '🔍', title: 'Nmap', desc: 'c_nmap_desc', color: 'green', tags: ['Port Scan', 'Service', 'NSE'] },
+  { id: 'windows', icon: '🪟', title: 'Windows', desc: 'c_windows_desc', color: 'orange', tags: ['SMB', 'WinRM', 'MSSQL'] },
+  { id: 'redis', icon: '🗄', title: 'Redis', desc: 'c_redis_desc', color: 'red', tags: ['redis-cli', 'KEYS', 'CONFIG'] },
+  { id: 'gobuster', icon: '🌐', title: 'Gobuster', desc: 'c_gobuster_desc', color: 'purple', tags: ['dir', 'dns', 'wordlist'] },
+  { id: 'sql', icon: '💉', title: 'SQL', desc: 'c_sql_desc', color: 'yellow', tags: ['MySQL', 'MariaDB', 'SQLi'] },
+  { id: 'phpshell', icon: '🐚', title: 'PHP Shell', desc: 'c_phpshell_desc', color: 'red', tags: ['NC', 'bash', 'python3', 'pty'] },
+  { id: 'network', icon: '🔒', title: 'Ağ Güvenliği', desc: 'c_network_desc', color: 'purple', tags: ['NC', 'Responder', 'NTLMv2'] },
+  { id: 'john', icon: '🔑', title: 'John & Hashcat', desc: 'c_john_desc', color: 'yellow', tags: ['John', 'Hashcat', 'rockyou'] },
+  { id: 'aws', icon: '☁', title: 'AWS', desc: 'c_aws_desc', color: 'cyan', tags: ['S3', 'aws-cli', 'endpoint'] },
+  { id: 'openvpn', icon: '🛡️', title: 'OpenVPN', desc: 'c_openvpn_desc', color: 'purple', tags: ['VPN', '.ovpn', 'tun0'] },
+  { id: 'burp', icon: '🐝', title: 'Burp Suite', desc: 'c_burp_desc', color: 'orange', tags: ['Proxy', 'GUI', 'noVNC'] },
+  { id: 'grep', icon: '🔎', title: 'Grep', desc: 'c_grep_desc', color: 'green', tags: ['-r', '-i', '-E', 'regex'] },
 ];
 
 const COLOR_MAP = {
@@ -86,7 +86,7 @@ export default function HomePage({ onNavigate }) {
           >
             <div className={`card-icon-wrap ${COLOR_MAP[card.color] || 'green'}`}>{card.icon}</div>
             <div className="card-title">{card.title}</div>
-            <div className="card-desc">{card.desc}</div>
+            <div className="card-desc">{t(card.desc)}</div>
             <div className="card-tags">
               {card.tags.map(t => (
                 <span key={t} className={`tag ${COLOR_MAP[card.color] || 'gray'}`}>{t}</span>
