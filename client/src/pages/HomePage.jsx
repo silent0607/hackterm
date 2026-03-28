@@ -17,20 +17,20 @@ import {
 } from 'lucide-react';
 
 const TOOLS = [
-  { id: 'terminal', icon: <Terminal />, color: 'cyan', label: 'terminal', desc: 'c_terminal' },
-  { id: 'nmap', icon: <Search />, color: 'green', label: 'nmap', desc: 'c_nmap' },
-  { id: 'ftp', icon: <FolderTree />, color: 'purple', label: 'ftp', desc: 'c_ftp' },
-  { id: 'redis', icon: <Database />, color: 'orange', label: 'redis', desc: 'c_redis' },
-  { id: 'openvpn', icon: <Shield />, color: 'red', label: 'openvpn', desc: 'c_openvpn' },
-  { id: 'burp', icon: <Cpu />, color: 'yellow', label: 'burp', desc: 'c_burp' },
-  { id: 'phpshell', icon: <Code />, color: 'cyan', label: 'phpshell', desc: 'c_phpshell' },
-  { id: 'network', icon: <Network />, color: 'green', label: 'network', desc: 'c_network' },
-  { id: 'sql', icon: <Lock />, color: 'purple', label: 'sql', desc: 'c_sql' },
-  { id: 'gobuster', icon: <Globe />, color: 'orange', label: 'gobuster', desc: 'c_gobuster' },
-  { id: 'john', icon: <FileType />, color: 'red', label: 'john', desc: 'c_john' },
-  { id: 'aws', icon: <Cloud />, color: 'yellow', label: 'aws', desc: 'c_aws' },
-  { id: 'grep', icon: <Layers />, color: 'cyan', label: 'grep', desc: 'c_grep' },
-  { id: 'settings', icon: <Settings />, color: 'gray', label: 'settings', desc: 'c_settings' }
+  { id: 'terminal', icon: <Terminal />, color: 'cyan', label: 'tool_terminal', desc: 'c_terminal' },
+  { id: 'nmap', icon: <Search />, color: 'green', label: 'tool_nmap', desc: 'c_nmap' },
+  { id: 'ftp', icon: <FolderTree />, color: 'purple', label: 'tool_ftp', desc: 'c_ftp' },
+  { id: 'redis', icon: <Database />, color: 'orange', label: 'tool_redis', desc: 'c_redis' },
+  { id: 'openvpn', icon: <Shield />, color: 'red', label: 'tool_openvpn', desc: 'c_openvpn' },
+  { id: 'burp', icon: <Cpu />, color: 'yellow', label: 'tool_burp', desc: 'c_burp' },
+  { id: 'phpshell', icon: <Code />, color: 'cyan', label: 'tool_phpshell', desc: 'c_phpshell' },
+  { id: 'network', icon: <Network />, color: 'green', label: 'tool_network', desc: 'c_network' },
+  { id: 'sql', icon: <Lock />, color: 'purple', label: 'tool_sql', desc: 'c_sql' },
+  { id: 'gobuster', icon: <Globe />, color: 'orange', label: 'tool_gobuster', desc: 'c_gobuster' },
+  { id: 'john', icon: <FileType />, color: 'red', label: 'tool_john', desc: 'c_john' },
+  { id: 'aws', icon: <Cloud />, color: 'yellow', label: 'tool_aws', desc: 'c_aws' },
+  { id: 'grep', icon: <Layers />, color: 'cyan', label: 'tool_grep', desc: 'c_grep' },
+  { id: 'settings', icon: <Settings />, color: 'gray', label: 'tool_settings', desc: 'c_settings' }
 ];
 
 export default function HomePage({ onNavigate }) {
