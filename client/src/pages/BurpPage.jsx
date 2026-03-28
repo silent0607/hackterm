@@ -78,6 +78,15 @@ export default function BurpPage({ onBack }) {
     } catch (e) {} finally { setRunning(false); }
   };
 
+  const handleLaunchFirefox = async () => {
+    try {
+      await fetch('/api/firefox/launch', { method: 'POST' });
+      window.open(vncUrl, '_blank');
+    } catch (e) {
+      window.open(vncUrl, '_blank');
+    }
+  };
+
   return (
     <div>
       <div className="page-header">
@@ -128,9 +137,9 @@ export default function BurpPage({ onBack }) {
             <div style={{ textAlign: 'center', marginBottom: 16 }}>
               {t('desktop_access_desc')}
             </div>
-            <a href={vncUrl} target="_blank" className="btn btn-purple" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <button onClick={handleLaunchFirefox} className="btn btn-purple" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               <ExternalLink size={16} /> {t('desktop_open')}
-            </a>
+            </button>
             
             <div style={{ marginTop: 24 }}>
               <SectionTitle icon={<ShieldCheck size={14} />}>{t('burp_ca_title')}</SectionTitle>

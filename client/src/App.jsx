@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { SocketProvider, useSocket } from './context/SocketContext';
 import { JobProvider } from './context/JobContext';
+import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import Sidebar from './components/Sidebar';
 import RightPanel from './components/RightPanel';
 
@@ -21,36 +22,40 @@ import OpenVpnPage from './pages/OpenVpnPage';
 import BurpPage from './pages/BurpPage';
 import GrepPage from './pages/GrepPage';
 import SettingsPage from './pages/SettingsPage';
+import PackagesPage from './pages/PackagesPage';
+import NotesPage from './pages/NotesPage';
+
+function JobGuard({ children }) {
+  const { activeJob } = useJobs();
+  const { t } = useLanguage();
+  if (activeJob) return children;
+  return (
+    <div className="guard-overlay">
+      <div className="guard-box glass-card">
+        <h3 style={{ color: 'var(--accent-orange)', marginBottom: 12 }}>⚠️ {t('job_required_title') || 'İş Seçimi Gerekli'}</h3>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>{t('job_required_desc') || 'Herhangi bir terminal işlemi başlatmadan önce sol üstten bir hedef (İş) seçmeli veya yeni bir iş oluşturmalısınız.'}</p>
+      </div>
+    </div>
+  );
+}
 
 function Topbar({ rightOpen, onToggleRight }) {
   const { connected } = useSocket();
+  const { t } = useLanguage();
   return (
     <div className="topbar">
       <div className="topbar-logo">
-        <span className="logo-bracket">[</span>
-        <span className="logo-text">HackTool</span>
-        <span className="logo-dot">·</span>
-        <span style={{ color: 'var(--accent-green)' }}>Basic</span>
-        <span className="logo-bracket">]</span>
+        <span>⬡ HackTerm</span> <span style={{ color: 'var(--text-muted)', fontSize: 13, fontWeight: 400, marginLeft: 8 }}>v4.0 Pro Lab</span>
       </div>
-      <div className="topbar-sep" />
-      <div className="topbar-status">
-        <div className={`status-dot ${connected ? '' : 'offline'}`} />
-        <span>{connected ? 'Sunucu bağlı' : 'Bağlanıyor...'}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div className="topbar-status">
+          <div className={`status-dot ${connected ? '' : 'offline'}`} />
+          <span>{connected ? t('connected') : t('connecting')}</span>
+        </div>
+        <button className="btn-pro btn-outline btn-sm" onClick={onToggleRight}>
+          📂 {t('menu_ftp')}
+        </button>
       </div>
-      <button
-        onClick={onToggleRight}
-        style={{
-          marginLeft: 12,
-          background: rightOpen ? 'rgba(0,255,136,0.1)' : 'transparent',
-          border: '1px solid ' + (rightOpen ? 'rgba(0,255,136,0.3)' : 'var(--border)'),
-          color: rightOpen ? 'var(--accent-green)' : 'var(--text-muted)',
-          borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 12, fontFamily: 'Inter'
-        }}
-        title="Dosya Paneli"
-      >
-        📂 Dosyalar
-      </button>
     </div>
   );
 }
@@ -72,6 +77,9 @@ const PAGE_MAP = {
   openvpn:    (props) => <OpenVpnPage {...props} />,
   burp:       (props) => <BurpPage {...props} />,
   grep:       (props) => <GrepPage {...props} />,
+  settings:   (props) => <SettingsPage {...props} />,
+  packages:   (props) => <PackagesPage {...props} />,
+  notes:      (props) => <NotesPage {...props} />,
 };
 
 function AppInner() {
@@ -81,17 +89,54 @@ function AppInner() {
   const navigate = (p) => setPage(p);
   const goBack = () => setPage('home');
 
-  const PageComponent = PAGE_MAP[page] || PAGE_MAP['home'];
-
   return (
     <div className="app-layout">
       <Topbar rightOpen={rightOpen} onToggleRight={() => setRightOpen(o => !o)} />
-      <Sidebar currentPage={page} onNavigate={navigate} />
-      <div className="main-content">
-        <div className={`page-area ${rightOpen ? 'right-open' : ''}`}>
-          <PageComponent onNavigate={navigate} onBack={goBack} />
-        </div>
-        <RightPanel open={rightOpen} onClose={() => setRightOpen(false)} />
+      <div className="main-container">
+        <Sidebar currentPage={page} onNavigate={navigate} />
+        <main className="main-content">
+          <div className="page-area">
+            {/* Persist all pages by hiding them instead of unmounting */}
+            <div style={{ display: page === 'home' ? 'block' : 'none', height: '100%' }}>
+              <HomePage onNavigate={navigate} />
+            </div>
+            <div style={{ display: page === 'terminal' ? 'block' : 'none', height: '100%' }}>
+              <JobGuard><TerminalPage onNavigate={navigate} onBack={goBack} /></JobGuard>
+            </div>
+            <div style={{ display: page === 'nmap' ? 'block' : 'none', height: '100%' }}>
+              <JobGuard><NmapPage onNavigate={navigate} onBack={goBack} /></JobGuard>
+            </div>
+            <div style={{ display: page === 'ftp' ? 'block' : 'none', height: '100%' }}>
+              <JobGuard><FtpPage onNavigate={navigate} onBack={goBack} /></JobGuard>
+            </div>
+            <div style={{ display: page === 'notes' ? 'block' : 'none', height: '100%' }}>
+              <NotesPage onNavigate={navigate} onBack={goBack} />
+            </div>
+            <div style={{ display: page === 'packages' ? 'block' : 'none', height: '100%' }}>
+              <PackagesPage onNavigate={navigate} onBack={goBack} />
+            </div>
+            <div style={{ display: page === 'settings' ? 'block' : 'none', height: '100%' }}>
+              <SettingsPage onNavigate={navigate} onBack={goBack} />
+            </div>
+            
+            {/* Minor tool pages (rendered conditionally as they are less state-heavy, but we could persist them too if needed) */}
+            {['sql', 'phpshell', 'network', 'john', 'aws', 'openvpn', 'burp', 'grep', 'redis', 'windows'].includes(page) && (
+              <JobGuard>
+                {page === 'sql' && <SqlPage onNavigate={navigate} onBack={goBack} />}
+                {page === 'phpshell' && <PhpShellPage onNavigate={navigate} onBack={goBack} />}
+                {page === 'network' && <NetworkPage onNavigate={navigate} onBack={goBack} />}
+                {page === 'john' && <JohnPage onNavigate={navigate} onBack={goBack} />}
+                {page === 'aws' && <AwsPage onNavigate={navigate} onBack={goBack} />}
+                {page === 'openvpn' && <OpenVpnPage onNavigate={navigate} onBack={goBack} />}
+                {page === 'burp' && <BurpPage onNavigate={navigate} onBack={goBack} />}
+                {page === 'grep' && <GrepPage onNavigate={navigate} onBack={goBack} />}
+                {page === 'redis' && <RedisPage onNavigate={navigate} onBack={goBack} />}
+                {page === 'windows' && <WindowsPage onNavigate={navigate} onBack={goBack} />}
+              </JobGuard>
+            )}
+          </div>
+          <RightPanel open={rightOpen} onClose={() => setRightOpen(false)} />
+        </main>
       </div>
     </div>
   );
@@ -99,10 +144,12 @@ function AppInner() {
 
 export default function App() {
   return (
-    <SocketProvider>
-      <JobProvider>
-        <AppInner />
-      </JobProvider>
-    </SocketProvider>
+    <LanguageProvider>
+      <SocketProvider>
+        <JobProvider>
+          <AppInner />
+        </JobProvider>
+      </SocketProvider>
+    </LanguageProvider>
   );
 }

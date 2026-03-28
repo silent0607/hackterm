@@ -66,18 +66,24 @@ RUN python3 -m venv /app/.venv \
 # Startup script to handle Xvfb, VNC, and Node server
 RUN echo '#!/bin/bash\n\
 rm -f /tmp/.X1-lock\n\
+dbus-daemon --system --fork\n\
 Xvfb :1 -screen 0 1920x1080x24 &\n\
 sleep 2\n\
-# Handle custom desktop path slug (symlink for noVNC)\n\
+# Handle custom desktop path slug\n\
 SLUG=${DESKTOP_PATH:-/desktop}\n\
 CLEAN_SLUG=$(echo $SLUG | sed "s|^/||")\n\
 if [ -n "$CLEAN_SLUG" ]; then\n\
-  ln -s /usr/share/novnc /usr/share/novnc/$CLEAN_SLUG\n\
+  mkdir -p /usr/share/novnc/$CLEAN_SLUG\n\
+  ln -sf /usr/share/novnc/*.html /usr/share/novnc/$CLEAN_SLUG/\n\
+  ln -sf /usr/share/novnc/core /usr/share/novnc/$CLEAN_SLUG/\n\
+  ln -sf /usr/share/novnc/vendor /usr/share/novnc/$CLEAN_SLUG/\n\
+  ln -sf /usr/share/novnc/app /usr/share/novnc/$CLEAN_SLUG/\n\
 fi\n\
 # Start minimal Openbox manager\n\
 openbox-session &\n\
 x11vnc -display :1 -nopw -forever -noxdamage -bg &\n\
-/usr/share/novnc/utils/launch.sh --vnc localhost:5901 --listen 6080 &\n\
+# Start websockify directly to ensure path is correct\n\
+/usr/bin/python3 /usr/bin/websockify --web /usr/share/novnc 6080 localhost:5901 &\n\
 node server/index.js' > /app/entrypoint.sh \
     && chmod +x /app/entrypoint.sh
 

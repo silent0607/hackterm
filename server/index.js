@@ -79,6 +79,50 @@ app.post('/api/vpn/disconnect', (req, res) => {
   });
 });
 
+// Notes Endpoints
+const NOTES_FILE = path.join(TOOLS_DIR, 'notes.json');
+app.get('/api/notes', (req, res) => {
+  try {
+    if (fs.existsSync(NOTES_FILE)) {
+      res.json(JSON.parse(fs.readFileSync(NOTES_FILE)));
+    } else {
+      res.json([]);
+    }
+  } catch (e) {
+    res.json([]);
+  }
+});
+app.post('/api/notes', (req, res) => {
+  fs.writeFileSync(NOTES_FILE, JSON.stringify(req.body.notes || []));
+  res.json({ success: true });
+});
+
+// Packages & Firefox Endpoints
+app.post('/api/packages/install', (req, res) => {
+  const { action, pkg } = req.body;
+  let cmd = '';
+  if (action === 'update') cmd = 'apt-get update';
+  else if (action === 'upgrade') cmd = 'apt-get update && apt-get upgrade -y';
+  else if (action === 'install' && pkg) cmd = `apt-get update && apt-get install -y ${pkg}`;
+  else return res.status(400).json({ error: 'Geçersiz parametre' });
+
+  const proc = spawn('sh', ['-c', cmd], { env: { ...process.env, DEBIAN_FRONTEND: 'noninteractive' }});
+  
+  proc.stdout.on('data', data => io.emit('package:log', data.toString()));
+  proc.stderr.on('data', data => io.emit('package:log', data.toString()));
+  proc.on('close', code => io.emit('package:done', code));
+  
+  res.json({ message: 'İşlem başlatıldı...' });
+});
+
+app.post('/api/firefox/launch', (req, res) => {
+  spawn('sh', ['-c', 'firefox'], {
+    env: { ...process.env, DISPLAY: ':1' },
+    detached: true
+  }).unref();
+  res.json({ message: 'Firefox başlatıldı' });
+});
+
 // Burp Endpoints
 app.get('/api/burp/status', (req, res) => {
   const installed = fs.existsSync(path.join(TOOLS_DIR, 'burp', 'BurpSuiteCommunity'));
