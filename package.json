@@ -1,0 +1,21 @@
+{
+  "name": "hacktoolbasic",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "node server/index.js",
+    "client": "cd client && npm run dev",
+    "install:all": "npm install && cd client && npm install",
+    "setup": "bash setup.sh"
+  },
+  "dependencies": {
+    "chokidar": "^3.6.0",
+    "concurrently": "^8.2.2",
+    "dotenv": "^17.3.1",
+    "express": "^4.18.3",
+    "node-pty": "^1.0.0",
+    "socket.io": "^4.7.5",
+    "ssh2": "^1.15.0"
+  }
+}

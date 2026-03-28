@@ -1,0 +1,11 @@
+node_modules
+client/node_modules
+.venv
+.tools
+downloads/*
+!downloads/.gitkeep
+*.log
+.DS_Store
+.env
+client/dist
+.git

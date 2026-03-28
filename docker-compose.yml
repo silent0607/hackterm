@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  hacktoolbasic:
+    build: .
+    container_name: hacktoolbasic-app
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./downloads:/app/downloads
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
