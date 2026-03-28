@@ -207,7 +207,7 @@ io.on('connection', (socket) => {
         name: 'xterm-256color',
         cols: 80,
         rows: 24,
-        cwd: process.env.HOME || '/root',
+        cwd: '/app',
         env
       });
 
