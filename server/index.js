@@ -155,6 +155,10 @@ const ftpWatcher = chokidar.watch(FTP_DIR, {
   ignoreInitial: false
 });
 
+app.get('/api/ftp/tree', (req, res) => {
+  res.json({ tree: buildFileTree(FTP_DIR) });
+});
+
 function buildFileTree(dir) {
   const result = [];
   try {

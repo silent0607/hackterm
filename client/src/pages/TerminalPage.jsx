@@ -73,14 +73,13 @@ export default function MultiTerminalPage() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 10, marginBottom: 16, alignItems: 'center' }}>
-        <button className="btn btn-green" onClick={addTerm}>
-          <Plus size={13} /> {t('new_terminal')}
+      <div className="terminal-mgr-controls" style={{ display: 'flex', gap: 16, marginBottom: 24, alignItems: 'center' }}>
+        <button className="btn-pro btn-cyan" onClick={addTerm}>
+          <Plus size={16} /> {t('new_terminal')}
         </button>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-secondary)', cursor: 'pointer' }}>
-          <input type="checkbox" checked={venv} onChange={e => setVenv(e.target.checked)}
-            style={{ accentColor: 'var(--accent-purple)' }} />
-          {t('run_in_venv')}
+        <label className="checkbox-label" style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13, cursor: 'pointer', color: 'var(--text-secondary)' }}>
+          <input type="checkbox" checked={venv} onChange={e => setVenv(e.target.checked)} style={{ width: 18, height: 18 }} />
+          <span>{t('run_in_venv')}</span>
         </label>
       </div>
 

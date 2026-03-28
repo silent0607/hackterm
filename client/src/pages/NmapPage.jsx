@@ -45,31 +45,30 @@ export default function NmapPage({ onBack }) {
   };
 
   return (
-    <div>
+    <div style={{ paddingBottom: 40 }}>
       <div className="page-header">
         <div>
-          <div className="page-header-back" onClick={onBack}>← Ana Menü</div>
-          <div className="page-title">🔍 <span>Nmap</span></div>
-          <div className="page-subtitle">Network Mapper – Port & servis keşfi</div>
+          <div className="page-header-back" onClick={onBack}>← {t('back_to_menu')}</div>
+          <h1 className="page-title">🔍 <span>{t('nmap')}</span></h1>
+          <p className="page-subtitle">{t('c_nmap')}</p>
         </div>
       </div>
 
       <div className="ip-bar">
-        <span className="ip-bar-label">🎯 Hedef IP</span>
-        <input value={ip} onChange={e => { setIp(e.target.value); if (activeJob) updateJob(activeJob.id, { ip: e.target.value }); }}
-          placeholder={activeJob?.ip || '10.10.10.10'} />
+        <span className="ip-bar-label">🎯 {t('target_ip_label')}</span>
+        <input className="form-input" value={ip} onChange={e => { setIp(e.target.value); if (activeJob) updateJob(activeJob.id, { ip: e.target.value }); }}
+          placeholder={activeJob?.ip || '10.10.10.10'} style={{ height: 38 }} />
       </div>
 
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
-        <button className="btn btn-green" onClick={quickScan}>
-          ⚡ Hızlı Port Tara
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 24, alignItems: 'center' }}>
+        <button className="btn-pro btn-cyan" onClick={quickScan}>
+          ⚡ {t('quick_scan')}
         </button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 200 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 300, maxWidth: 600 }}>
           <input className="form-input" value={ports} onChange={e => setPorts(e.target.value)}
-            placeholder="Port(lar): 22,80,443 veya 22-100"
-            style={{ flex: 1 }} />
-          <button className="btn btn-purple" onClick={versionScan}>
-            📋 Versiyon Bilgisi Al
+            placeholder={t('ports_placeholder')} />
+          <button className="btn-pro btn-purple" onClick={versionScan} style={{ whiteSpace: 'nowrap' }}>
+            📋 {t('get_version_info')}
           </button>
         </div>
       </div>
