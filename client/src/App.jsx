@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { SocketProvider, useSocket } from './context/SocketContext';
-import { JobProvider } from './context/JobContext';
+import { JobProvider, useJobs } from './context/JobContext';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import Sidebar from './components/Sidebar';
 import RightPanel from './components/RightPanel';
