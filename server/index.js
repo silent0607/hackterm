@@ -134,10 +134,25 @@ app.post('/api/burp/install', (req, res) => {
   const filePath = path.join(TOOLS_DIR, file);
   const installPath = path.join(TOOLS_DIR, 'burp');
   
-  if (!fs.existsSync(installPath)) fs.mkdirSync(installPath);
+  if (!fs.existsSync(installPath)) fs.mkdirSync(installPath, { recursive: true });
   
-  const proc = spawn('bash', [filePath, '--prefix', installPath, '--mode', 'unattended']);
-  proc.on('close', () => res.json({ message: 'Kurulum tamamlandı' }));
+  // Force headless: unset DISPLAY so installer can't open GUI
+  const env = { ...process.env };
+  delete env.DISPLAY;
+  
+  const proc = spawn('bash', [filePath, '-q', '-dir', installPath], {
+    env,
+    stdio: ['pipe', 'pipe', 'pipe']
+  });
+  
+  proc.stdout.on('data', data => io.emit('package:log', data.toString()));
+  proc.stderr.on('data', data => io.emit('package:log', data.toString()));
+  proc.on('close', code => {
+    io.emit('package:log', `\n>>> Burp Suite kurulum tamamlandı (kod: ${code}) <<<\n`);
+    io.emit('package:done', code);
+  });
+  
+  res.json({ message: 'Burp Suite kurulumu başlatıldı... Logları Paket Marketi konsolundan takip edebilirsiniz.' });
 });
 
 app.post('/api/burp/run', (req, res) => {
