@@ -1,5 +1,6 @@
 import { useJobs } from '../context/JobContext';
 import { useSocket } from '../context/SocketContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const TOOL_CARDS = [
   { id: 'terminal', icon: '⬡', title: 'Terminal', desc: 'Yerel veya uzak (SSH/Docker) terminaller aç, yönet', color: 'green', tags: ['PTY', 'SSH', 'Docker'] },
@@ -30,6 +31,7 @@ const COLOR_MAP = {
 export default function HomePage({ onNavigate }) {
   const { activeJob } = useJobs();
   const { connected } = useSocket();
+  const { t } = useLanguage();
 
   return (
     <div>
