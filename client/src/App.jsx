@@ -20,6 +20,7 @@ import AwsPage from './pages/AwsPage';
 import OpenVpnPage from './pages/OpenVpnPage';
 import BurpPage from './pages/BurpPage';
 import GrepPage from './pages/GrepPage';
+import SettingsPage from './pages/SettingsPage';
 
 function Topbar({ rightOpen, onToggleRight }) {
   const { connected } = useSocket();

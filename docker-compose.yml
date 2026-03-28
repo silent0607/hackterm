@@ -17,6 +17,6 @@ services:
       - .ovpn:/app/.ovpn
     environment:
       - NODE_ENV=production
-      - DESKTOP_ENV=${DESKTOP_ENV:-xfce}
+      - DESKTOP_PATH=${DESKTOP_PATH:-/desktop}
       - NOVNC_PORT=${NOVNC_PORT:-6080}
     restart: unless-stopped

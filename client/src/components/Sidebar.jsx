@@ -18,6 +18,7 @@ const NAV_ITEMS = [
   { id: 'openvpn',    label: 'OpenVPN',         icon: '🛡️' },
   { id: 'burp',       label: 'Burp Suite',      icon: '🐝' },
   { id: 'grep',       label: 'Grep',            icon: '🔎' },
+  { id: 'settings',   label: 'Ayarlar',         icon: '⚙️' },
 ];
 
 export default function Sidebar({ currentPage, onNavigate }) {

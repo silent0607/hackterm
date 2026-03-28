@@ -24,12 +24,8 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     python3-venv \
-    # GUI Stacks
-    xfce4 \
-    xfce4-goodies \
-    gnome-session \
-    gnome-terminal \
-    nautilus \
+    # Minimal GUI Stack (Openbox instead of Xfce/GNOME)
+    openbox \
     xvfb \
     x11vnc \
     novnc \
@@ -42,7 +38,9 @@ RUN apt-get update && apt-get install -y \
     iputils-ping \
     openvpn \
     firefox \
-    # Cleanup
+    # Pre-cache apt for fast on-demand DE install
+    && apt-get clean \
+    && apt-get update \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
@@ -70,12 +68,14 @@ RUN echo '#!/bin/bash\n\
 rm -f /tmp/.X1-lock\n\
 Xvfb :1 -screen 0 1920x1080x24 &\n\
 sleep 2\n\
-if [ "$DESKTOP_ENV" = "gnome" ]; then\n\
-    export XDG_CURRENT_DESKTOP=GNOME\n\
-    gnome-session --session=gnome-flashback-metacity &\n\
-else\n\
-    startxfce4 &\n\
+# Handle custom desktop path slug (symlink for noVNC)\n\
+SLUG=${DESKTOP_PATH:-/desktop}\n\
+CLEAN_SLUG=$(echo $SLUG | sed "s|^/||")\n\
+if [ -n "$CLEAN_SLUG" ]; then\n\
+  ln -s /usr/share/novnc /usr/share/novnc/$CLEAN_SLUG\n\
 fi\n\
+# Start minimal Openbox manager\n\
+openbox-session &\n\
 x11vnc -display :1 -nopw -forever -noxdamage -bg &\n\
 /usr/share/novnc/utils/launch.sh --vnc localhost:5901 --listen 6080 &\n\
 node server/index.js' > /app/entrypoint.sh \
@@ -88,7 +88,7 @@ TOOLS_DIR=/app/.tools\n\
 OVPN_DIR=/app/.ovpn\n\
 RESPONDER_PATH=/app/.tools/Responder\n\
 JOHN_PATH=/usr/bin/john\n\
-DESKTOP_ENV=\${DESKTOP_ENV:-xfce}\n\
+DESKTOP_PATH=\${DESKTOP_PATH:-/desktop}\n\
 PORT=3001" > /app/server/.env
 
 EXPOSE 3001 6080

@@ -42,7 +42,8 @@ export default function BurpPage({ onBack }) {
     fetchEnv();
   }, []);
 
-  const vncUrl = `http://${window.location.hostname}:${envInfo.novncPort}/vnc.html?host=${window.location.hostname}&port=${envInfo.novncPort}&autoconnect=true`;
+  // desktopPath is something like "/desktop"
+  const vncUrl = `http://${window.location.hostname}:${envInfo.novncPort}${envInfo.desktopPath}/vnc.html?host=${window.location.hostname}&port=${envInfo.novncPort}&autoconnect=true`;
 
   const handleUpload = async (e) => {
     const file = e.target.files[0];
