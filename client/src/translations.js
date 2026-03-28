@@ -327,6 +327,7 @@ export const translations = {
     settings: 'System Settings',
     job_required_title: 'Target (Job) Required',
     job_required_desc: 'You must select a target from the sidebar or create a new job before proceeding.',
+    target_ip_label: 'Target IP (optional)',
     terminal_mgr: 'Terminal Manager',
     terminal_desc: 'Manage multiple interactive terminal sessions simultaneously.',
     new_terminal: 'New Terminal',
