@@ -104,6 +104,19 @@ wait_for_display 2\n\
 mkdir -p /root/.vnc\n\
 x11vnc -storepasswd ${ADMIN_PASS:-password} /root/.vnc/passwd\n\
 \n\
+# Handle custom desktop path slug for BOTH displays\n\
+SLUG=${DESKTOP_PATH:-/desktop}\n\
+CLEAN_SLUG=$(echo $SLUG | sed "s|^/||")\n\
+ln -sf /usr/share/novnc/vnc.html /usr/share/novnc/index.html\n\
+if [ -n "$CLEAN_SLUG" ]; then\n\
+  mkdir -p /usr/share/novnc/$CLEAN_SLUG\n\
+  ln -sf /usr/share/novnc/*.html /usr/share/novnc/$CLEAN_SLUG/\n\
+  ln -sf /usr/share/novnc/core /usr/share/novnc/$CLEAN_SLUG/\n\
+  ln -sf /usr/share/novnc/vendor /usr/share/novnc/$CLEAN_SLUG/\n\
+  ln -sf /usr/share/novnc/app /usr/share/novnc/$CLEAN_SLUG/\n\
+  ln -sf /usr/share/novnc/vnc.html /usr/share/novnc/$CLEAN_SLUG/index.html\n\
+fi\n\
+\n\
 # Set backgrounds and start window managers\n\
 DISPLAY=:1 xsetroot -solid "#020617"\n\
 DISPLAY=:2 xsetroot -solid "#0f172a"\n\
