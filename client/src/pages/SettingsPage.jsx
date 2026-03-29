@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Layout, CheckCircle2, Circle, Loader2, PlayCircle, MonitorStop } from 'lucide-react';
+import { Settings, Layout, CheckCircle2, Circle, Loader2, PlayCircle, MonitorStop, PackageSearch } from 'lucide-react';
 import { SectionTitle, InfoCard } from '../components/InfoCard';
 import { useLanguage } from '../context/LanguageContext';
 import Terminal from '../components/Terminal';
@@ -7,6 +7,7 @@ import Terminal from '../components/Terminal';
 export default function SettingsPage() {
   const { t } = useLanguage();
   const [status, setStatus] = useState({ xfce: false, gnome: false });
+  const [marketStatus, setMarketStatus] = useState({});
   const [loading, setLoading] = useState(false);
   const [installingType, setInstallingType] = useState(null);
   const [message, setMessage] = useState('');
@@ -18,6 +19,12 @@ export default function SettingsPage() {
       const res = await fetch('/api/desktop/status');
       const data = await res.json();
       setStatus(data);
+
+      const mRes = await fetch('/api/market/status');
+      if (mRes.ok) {
+        const mData = await mRes.json();
+        setMarketStatus(mData);
+      }
     } catch (e) {}
   };
 
@@ -44,6 +51,27 @@ export default function SettingsPage() {
       setMessage(`error: ${t('error')}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleInstallTool = async (tool, displayName) => {
+    setLoading(true);
+    setInstallingType(`tool_${tool}`);
+    setMessage(`${displayName} yükleniyor...`);
+    
+    try {
+      const res = await fetch('/api/market/install', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tool, termId })
+      });
+      const data = await res.json();
+      setMessage(data.message);
+    } catch (e) {
+      setMessage(`error: ${t('error')}`);
+    } finally {
+      setLoading(false);
+      fetchStatus();
     }
   };
 
@@ -144,11 +172,66 @@ export default function SettingsPage() {
         <div>
            <InfoCard title={t('de_status_title')} icon="🖥️" color="purple">
               <div className="cmd-desc">
-                <b>Mevcut WM:</b> Openbox (Aktif)<br/><br/>
+                <b>Mevcut WM:</b> Fluxbox (Aktif)<br/><br/>
                 <b>İpucu:</b> {t('de_tip')}<br/><br/>
                 <b>Dikkat:</b> {t('de_warning')}
               </div>
            </InfoCard>
+        </div>
+      </div>
+
+      <div style={{ marginTop: 24 }}>
+        <SectionTitle icon={<PackageSearch size={18} />}>Paket Market (Siber Güvenlik Araçları)</SectionTitle>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+          gap: 16,
+          background: 'transparent',
+          padding: 0,
+          borderRadius: 8
+        }}>
+          {[
+            { id: 'nc', name: 'Netcat', desc: 'Ağ üzerinde veri okuma ve yazma aracı' },
+            { id: 'mysql', name: 'MySQL Client', desc: 'Veritabanı bağlantı aracı' },
+            { id: 'john', name: 'John the Ripper', desc: 'Gelişmiş şifre kırma yazılımı' },
+            { id: 'hashcat', name: 'Hashcat', desc: 'Dünyanın en hızlı parola kırıcısı' },
+            { id: 'awscli', name: 'AWS CLI', desc: 'Amazon Web Services komut aracı' },
+            { id: 'impacket', name: 'Impacket', desc: 'Ağ protokolleri için Python kütüphanesi' },
+            { id: 'evilwinrm', name: 'Evil-WinRM', desc: 'Windows Remote Management aracı' },
+            { id: 'smbclient', name: 'SMBclient', desc: 'SMB/CIFS paylaşımlarına erişim' },
+            { id: 'responder', name: 'Responder', desc: 'Ağ üzerinde zehirlenme aracı' }
+          ].map(app => (
+            <div key={app.id} style={{
+              background: 'var(--panel-bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 8,
+              padding: 16,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}>
+              <div style={{ marginBottom: 16 }}>
+                <b style={{ color: 'var(--accent-cyan)' }}>{app.name}</b>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{app.desc}</div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                {marketStatus[app.id] ? (
+                  <span style={{ color: 'var(--accent-green)', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
+                    <CheckCircle2 size={14} /> Kurulu
+                  </span>
+                ) : (
+                  <button 
+                    className="btn btn-xs btn-cyan" 
+                    onClick={() => handleInstallTool(app.id, app.name)}
+                    disabled={loading}
+                    style={{ background: 'transparent', border: '1px solid var(--accent-cyan)', color: 'var(--accent-cyan)'}}
+                  >
+                    {loading && installingType === `tool_${app.id}` ? <Loader2 size={12} className="spin" /> : 'İndir & Kur'}
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

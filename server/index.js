@@ -9,7 +9,7 @@ const path = require('path');
 const fs = require('fs');
 
 const multer = require('multer');
-const { exec, spawn } = require('child_process');
+const { exec, spawn, execSync } = require('child_process');
 
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
@@ -333,6 +333,45 @@ app.post('/api/desktop/install', (req, res) => {
     proc.stderr.on('data', (data) => io.emit(`terminal:data:${termId}`, data.toString()));
     proc.on('close', (code) => {
       io.emit(`terminal:data:${termId}`, `\n>>> Kurulum tamamlandı (kod: ${code}) <<<\n`);
+    });
+  }
+
+  res.json({ message: 'Kurulum başlatıldı. Terminalden takip edebilirsiniz.' });
+});
+
+// Hacking Tools Market (Paket Market)
+const toolsConfig = {
+  nc: { check: () => { try { execSync('which nc'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y netcat-traditional' },
+  mysql: { check: () => { try { execSync('which mysql'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y default-mysql-client' },
+  john: { check: () => { try { execSync('which john'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y john' },
+  hashcat: { check: () => { try { execSync('which hashcat'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y hashcat' },
+  awscli: { check: () => { try { execSync('which aws'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y awscli' },
+  impacket: { check: () => fs.existsSync('/app/.venv/bin/impacket-psexec'), cmd: '/app/.venv/bin/pip install impacket' },
+  evilwinrm: { check: () => { try { execSync('which evil-winrm'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y ruby ruby-dev && gem install evil-winrm' },
+  smbclient: { check: () => { try { execSync('which smbclient'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y smbclient' },
+  responder: { check: () => fs.existsSync('/app/.tools/Responder/Responder.py'), cmd: 'git clone https://github.com/lgandx/Responder.git /app/.tools/Responder || (cd /app/.tools/Responder && git pull)' }
+};
+
+app.get('/api/market/status', (req, res) => {
+  const status = {};
+  for (const [tool, config] of Object.entries(toolsConfig)) {
+    status[tool] = config.check();
+  }
+  res.json(status);
+});
+
+app.post('/api/market/install', (req, res) => {
+  const { tool, termId } = req.body;
+  if (!toolsConfig[tool]) return res.status(400).json({ error: 'Bilinmeyen araç' });
+
+  const cmd = toolsConfig[tool].cmd;
+  const proc = spawn('sh', ['-c', cmd], { env: { ...process.env, DEBIAN_FRONTEND: 'noninteractive' }});
+  
+  if (termId) {
+    proc.stdout.on('data', (data) => io.emit(`terminal:data:${termId}`, data.toString()));
+    proc.stderr.on('data', (data) => io.emit(`terminal:data:${termId}`, data.toString()));
+    proc.on('close', (code) => {
+      io.emit(`terminal:data:${termId}`, `\n>>> [${tool}] Kurulumu tamamlandı (kod: ${code}) <<<\n`);
     });
   }
 
