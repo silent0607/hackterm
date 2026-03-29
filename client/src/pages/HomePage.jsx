@@ -1,6 +1,7 @@
 import { useJobs } from '../context/JobContext';
+import { useLanguage } from '../context/LanguageContext';
 import { 
-  Terminal, 
+  Terminal as TerminalIcon, 
   Search, 
   FolderTree, 
   Database, 
@@ -20,7 +21,7 @@ import {
 } from 'lucide-react';
 
 const TOOLS = [
-  { id: 'terminal', icon: <Terminal />, color: 'cyan', label: 'tool_terminal', desc: 'c_terminal' },
+  { id: 'terminal', icon: <TerminalIcon />, color: 'cyan', label: 'tool_terminal', desc: 'c_terminal' },
   { id: 'nmap', icon: <Search />, color: 'green', label: 'tool_nmap', desc: 'c_nmap' },
   { id: 'ftp', icon: <FolderTree />, color: 'purple', label: 'tool_ftp', desc: 'c_ftp' },
   { id: 'gobuster', icon: <Globe />, color: 'orange', label: 'tool_gobuster', desc: 'c_gobuster' },

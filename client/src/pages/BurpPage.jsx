@@ -1,3 +1,9 @@
+import { useState, useEffect, useRef } from 'react';
+import { useSocket } from '../context/SocketContext';
+import { useJobs } from '../context/JobContext';
+import { useLanguage } from '../context/LanguageContext';
+import { InfoCard, SectionTitle } from '../components/InfoCard';
+import { Monitor, Upload, Play, Package, ShieldCheck, Chrome } from 'lucide-react';
 import Terminal from '../components/Terminal';
 
 export default function BurpPage({ onBack }) {

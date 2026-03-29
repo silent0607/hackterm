@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { LayoutGrid, Monitor, FolderTree, Package, FileText, Settings, Languages, Home, Plus, Trash2, Pin } from 'lucide-react';
 import { useJobs } from '../context/JobContext';
 import { useLanguage } from '../context/LanguageContext';
