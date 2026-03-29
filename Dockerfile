@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y \
     && echo 'Package: *\nPin: release o=LP-PPA-mozillateam\nPin-Priority: 1001\n' > /etc/apt/preferences.d/mozilla-firefox \
     && apt-get update && apt-get install -y --allow-downgrades \
     curl \
+    wget \
     gnupg \
     build-essential \
     python3 \
@@ -83,11 +84,12 @@ RUN python3 -m venv /app/.venv \
 
 # Startup script to handle Xvfb, VNC, and Node server
 RUN echo '#!/bin/bash\n\
-rm -f /tmp/.X1-lock /tmp/.X2-lock\n\
+rm -f /tmp/.X1-lock /tmp/.X2-lock /tmp/.X3-lock\n\
 dbus-daemon --system --fork\n\
 # Start Displays\n\
 Xvfb :1 -screen 0 1920x1080x24 &\n\
 Xvfb :2 -screen 0 1920x1080x24 &\n\
+Xvfb :3 -screen 0 1920x1080x24 &\n\
 \n\
 # Function to wait for display\n\
 wait_for_display() {\n\
@@ -102,6 +104,7 @@ wait_for_display() {\n\
 \n\
 wait_for_display 1\n\
 wait_for_display 2\n\
+wait_for_display 3\n\
 \n\
 # Handle VNC Password\n\
 mkdir -p /root/.vnc\n\
@@ -123,14 +126,18 @@ fi\n\
 # Set backgrounds and start window managers\n\
 DISPLAY=:1 xsetroot -solid "#020617"\n\
 DISPLAY=:2 xsetroot -solid "#0f172a"\n\
+DISPLAY=:3 xsetroot -solid "#1e293b"\n\
 DISPLAY=:1 fluxbox &\n\
 DISPLAY=:2 fluxbox &\n\
+DISPLAY=:3 fluxbox &\n\
 \n\
 # Start Clipboard Sync\n\
 DISPLAY=:1 autocutsel -fork &\n\
 DISPLAY=:1 autocutsel -selection PRIMARY -fork &\n\
 DISPLAY=:2 autocutsel -fork &\n\
 DISPLAY=:2 autocutsel -selection PRIMARY -fork &\n\
+DISPLAY=:3 autocutsel -fork &\n\
+DISPLAY=:3 autocutsel -selection PRIMARY -fork &\n\
 \n\
 # Start VNC/Websockify for DISPLAY :1 (Port 6080)\n\
 x11vnc -display :1 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5901 -bg -quiet -pointer_mode 1 -noxrecord -noxfixes -noxdamage -wait 50 -defer 50 -capslock -xkb &\n\
@@ -139,6 +146,10 @@ x11vnc -display :1 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5901 -bg
 # Start VNC/Websockify for DISPLAY :2 (Port 6081)\n\
 x11vnc -display :2 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5902 -bg -quiet -pointer_mode 1 -noxrecord -noxfixes -noxdamage -wait 50 -defer 50 -capslock -xkb &\n\
 /usr/bin/python3 /usr/bin/websockify --web /usr/share/novnc 6081 localhost:5902 &\n\
+\n\
+# Start VNC/Websockify for DISPLAY :3 (Port 6082)\n\
+x11vnc -display :3 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5903 -bg -quiet -pointer_mode 1 -noxrecord -noxfixes -noxdamage -wait 50 -defer 50 -capslock -xkb &\n\
+/usr/bin/python3 /usr/bin/websockify --web /usr/share/novnc 6082 localhost:5903 &\n\
 \n\
 node server/index.js' > /app/entrypoint.sh \
     && chmod +x /app/entrypoint.sh
@@ -156,6 +167,6 @@ ADMIN_PASS=\${ADMIN_PASS:-password}\n\
 SESSION_SECRET=\${SESSION_SECRET:-hackterm-secret-key}\n\
 PORT=3001" > /app/server/.env
 
-EXPOSE 3001 6080 6081
+EXPOSE 3001 6080 6081 6082
 
 CMD ["/app/entrypoint.sh"]

@@ -357,7 +357,8 @@ const toolsConfig = {
   firefox: { check: () => { try { execSync('which firefox'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y firefox' },
   redis: { check: () => { try { execSync('which redis-cli'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y redis-tools' },
   ftp: { check: () => { try { execSync('which ftp'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y ftp' },
-  seclists: { check: () => fs.existsSync('/usr/share/seclists'), cmd: 'apt-get update && apt-get install -y seclists wordlists && (gunzip /usr/share/wordlists/rockyou.txt.gz || true)' }
+  seclists: { check: () => fs.existsSync('/usr/share/seclists'), cmd: 'apt-get update && apt-get install -y seclists wordlists && (gunzip /usr/share/wordlists/rockyou.txt.gz || true)' },
+  nano: { check: () => { try { execSync('which nano'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y nano' }
 };
 
 app.get('/api/market/status', (req, res) => {

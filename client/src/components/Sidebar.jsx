@@ -30,10 +30,11 @@ const ALL_TOOLS = [
   { id: 'openvpn',    label: 'tool_openvpn', icon: <Pin size={14} /> },
   { id: 'aws',        label: 'tool_aws',     icon: <Pin size={14} /> },
   { id: 'grep',       label: 'tool_grep',    icon: <Pin size={14} /> },
+  { id: 'wireshark',  label: 'tool_wireshark',icon: <Pin size={14} /> },
 ];
 
 export default function Sidebar({ currentPage, onNavigate }) {
-  const { jobs, activeJobId, deleteJob, addJob, pinnedTools } = useJobs();
+  const { jobs, activeJobId, deleteJob, addJob, pinnedTools, setActiveJobId } = useJobs();
   const { language, setLanguage, t } = useLanguage();
   const [editingJobId, setEditingJobId] = useState(null);
   const [newJobModal, setNewJobModal] = useState(false);

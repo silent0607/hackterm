@@ -22,6 +22,7 @@ import JohnPage from './pages/JohnPage';
 import AwsPage from './pages/AwsPage';
 import OpenVpnPage from './pages/OpenVpnPage';
 import BurpPage from './pages/BurpPage';
+import WiresharkPage from './pages/WiresharkPage';
 import GrepPage from './pages/GrepPage';
 import SettingsPage from './pages/SettingsPage';
 import PackagesPage from './pages/PackagesPage';
@@ -108,7 +109,7 @@ function AppInner({ onLogout, user }) {
               <ShortcutsPage onRefresh={refreshShortcuts} onNavigate={navigate} onBack={goBack} />
             </div>
             
-            {['sql', 'phpshell', 'network', 'john', 'aws', 'openvpn', 'burp', 'grep', 'redis', 'windows', 'gobuster'].map(p => (
+            {['sql', 'phpshell', 'network', 'john', 'aws', 'openvpn', 'burp', 'wireshark', 'grep', 'redis', 'windows', 'gobuster'].map(p => (
               <div key={p} style={{ display: page === p ? 'block' : 'none', height: '100%' }}>
                 <JobGuard>
                   {p === 'sql' && <SqlPage onNavigate={navigate} onBack={goBack} />}
@@ -118,6 +119,7 @@ function AppInner({ onLogout, user }) {
                   {p === 'aws' && <AwsPage onNavigate={navigate} onBack={goBack} />}
                   {p === 'openvpn' && <OpenVpnPage onNavigate={navigate} onBack={goBack} />}
                   {p === 'burp' && <BurpPage onNavigate={navigate} onBack={goBack} />}
+                  {p === 'wireshark' && <WiresharkPage onNavigate={navigate} onBack={goBack} />}
                   {p === 'grep' && <GrepPage onNavigate={navigate} onBack={goBack} />}
                   {p === 'redis' && <RedisPage onNavigate={navigate} onBack={goBack} />}
                   {p === 'windows' && <WindowsPage onNavigate={navigate} onBack={goBack} />}
