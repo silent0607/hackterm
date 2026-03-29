@@ -35,6 +35,7 @@ RUN apt-get update && apt-get install -y \
     websockify \
     x11-utils \
     x11-xserver-utils \
+    tint2 \
     # Tools
     nmap \
     john \
@@ -106,13 +107,14 @@ DISPLAY=:1 xsetroot -solid "#020617"\n\
 DISPLAY=:2 xsetroot -solid "#0f172a"\n\
 DISPLAY=:1 openbox-session &\n\
 DISPLAY=:2 openbox-session &\n\
+DISPLAY=:1 tint2 &\n\
 \n\
 # Start VNC/Websockify for DISPLAY :1 (Port 6080)\n\
-x11vnc -display :1 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5901 -bg -quiet -pointer_mode 1 -noxrecord -noxfixes -noxdamage &\n\
+x11vnc -display :1 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5901 -bg -quiet -pointer_mode 1 -noxrecord -noxfixes -noxdamage -wait 50 -defer 50 &\n\
 /usr/bin/python3 /usr/bin/websockify --web /usr/share/novnc 6080 localhost:5901 &\n\
 \n\
 # Start VNC/Websockify for DISPLAY :2 (Port 6081)\n\
-x11vnc -display :2 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5902 -bg -quiet -pointer_mode 1 -noxrecord -noxfixes -noxdamage &\n\
+x11vnc -display :2 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5902 -bg -quiet -pointer_mode 1 -noxrecord -noxfixes -noxdamage -wait 50 -defer 50 &\n\
 /usr/bin/python3 /usr/bin/websockify --web /usr/share/novnc 6081 localhost:5902 &\n\
 \n\
 node server/index.js' > /app/entrypoint.sh \

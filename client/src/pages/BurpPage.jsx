@@ -92,7 +92,11 @@ export default function BurpPage({ onBack }) {
 
   const handleLaunchFirefox = async () => {
     try {
-      await fetch('/api/firefox/launch', { method: 'POST' });
+      await fetch('/api/firefox/launch', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ termId })
+      });
       window.open(firefoxUrl, '_blank');
     } catch (e) {
       window.open(firefoxUrl, '_blank');

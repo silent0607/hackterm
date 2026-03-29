@@ -178,10 +178,19 @@ app.post('/api/packages/install', (req, res) => {
 });
 
 app.post('/api/firefox/launch', (req, res) => {
-  spawn('sh', ['-c', 'firefox --disable-gpu --no-sandbox'], {
-    env: { ...process.env, DISPLAY: ':2' },
-    detached: true
-  }).unref();
+  const { termId } = req.body;
+  const proc = spawn('sh', ['-c', 'firefox --no-sandbox --disable-gpu'], {
+    env: { ...process.env, DISPLAY: ':2' }
+  });
+
+  if (termId) {
+    proc.stdout.on('data', data => io.emit(`terminal:data:${termId}`, `[Firefox STDOUT] ${data.toString()}`));
+    proc.stderr.on('data', data => io.emit(`terminal:data:${termId}`, `[Firefox STDERR] ${data.toString()}`));
+    proc.on('close', code => {
+      io.emit(`terminal:data:${termId}`, `\n>>> Firefox durduruldu (kod: ${code}) <<<\n`);
+    });
+  }
+
   res.json({ message: 'Firefox başlatıldı (Display :2)' });
 });
 
@@ -192,13 +201,12 @@ app.get('/api/burp/status', (req, res) => {
 });
 
 app.post('/api/burp/install', (req, res) => {
-  const { file } = req.body;
+  const { file, termId } = req.body;
   const filePath = path.join(TOOLS_DIR, file);
   const installPath = path.join(TOOLS_DIR, 'burp');
   
   if (!fs.existsSync(installPath)) fs.mkdirSync(installPath, { recursive: true });
   
-  // Force headless: unset DISPLAY so installer can't open GUI
   const env = { ...process.env };
   delete env.DISPLAY;
   
@@ -207,17 +215,23 @@ app.post('/api/burp/install', (req, res) => {
     stdio: ['pipe', 'pipe', 'pipe']
   });
   
-  proc.stdout.on('data', data => io.emit('package:log', data.toString()));
-  proc.stderr.on('data', data => io.emit('package:log', data.toString()));
-  proc.on('close', code => {
-    io.emit('package:log', `\n>>> Burp Suite kurulum tamamlandı (kod: ${code}) <<<\n`);
-    io.emit('package:done', code);
-  });
+  if (termId) {
+    proc.stdout.on('data', data => io.emit(`terminal:data:${termId}`, data.toString()));
+    proc.stderr.on('data', data => io.emit(`terminal:data:${termId}`, data.toString()));
+    proc.on('close', code => {
+      io.emit(`terminal:data:${termId}`, `\n>>> Burp Suite kurulum tamamlandı (kod: ${code}) <<<\n`);
+      io.emit('package:done', code);
+    });
+  } else {
+    proc.stdout.on('data', data => io.emit('package:log', data.toString()));
+    proc.on('close', code => io.emit('package:done', code));
+  }
   
-  res.json({ message: 'Burp Suite kurulumu başlatıldı... Logları Paket Marketi konsolundan takip edebilirsiniz.' });
+  res.json({ message: 'Burp Suite kurulumu başlatıldı... Logları terminalden takip edebilirsiniz.' });
 });
 
 app.post('/api/burp/run', (req, res) => {
+  const { termId } = req.body;
   const burpPath = path.join(TOOLS_DIR, 'burp', 'BurpSuiteCommunity');
   if (!fs.existsSync(burpPath)) {
     return res.status(404).json({ error: 'Burp Suite bulunamadı. Lütfen önce kurulum yapın.' });
@@ -227,12 +241,13 @@ app.post('/api/burp/run', (req, res) => {
     env: { ...process.env, DISPLAY: ':1' }
   });
 
-  proc.stdout.on('data', data => io.emit('package:log', `[Burp STDOUT] ${data.toString()}`));
-  proc.stderr.on('data', data => io.emit('package:log', `[Burp STDERR] ${data.toString()}`));
-  
-  proc.on('close', code => {
-    io.emit('package:log', `\n>>> Burp Suite durduruldu (kod: ${code}) <<<\n`);
-  });
+  if (termId) {
+    proc.stdout.on('data', data => io.emit(`terminal:data:${termId}`, `[Burp STDOUT] ${data.toString()}`));
+    proc.stderr.on('data', data => io.emit(`terminal:data:${termId}`, `[Burp STDERR] ${data.toString()}`));
+    proc.on('close', code => {
+      io.emit(`terminal:data:${termId}`, `\n>>> Burp Suite durduruldu (kod: ${code}) <<<\n`);
+    });
+  }
 
   res.json({ message: 'Burp Suite başlatıldı. Logları takip edebilirsiniz.' });
 });
