@@ -350,7 +350,12 @@ const toolsConfig = {
   impacket: { check: () => fs.existsSync('/app/.venv/bin/impacket-psexec'), cmd: '/app/.venv/bin/pip install impacket' },
   evilwinrm: { check: () => { try { execSync('which evil-winrm'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y ruby ruby-dev && gem install evil-winrm' },
   smbclient: { check: () => { try { execSync('which smbclient'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y smbclient' },
-  responder: { check: () => fs.existsSync('/app/.tools/Responder/Responder.py'), cmd: 'git clone https://github.com/lgandx/Responder.git /app/.tools/Responder || (cd /app/.tools/Responder && git pull)' }
+  responder: { check: () => fs.existsSync('/app/.tools/Responder/Responder.py'), cmd: 'git clone https://github.com/lgandx/Responder.git /app/.tools/Responder || (cd /app/.tools/Responder && git pull)' },
+  wireshark: { check: () => { try { execSync('which wireshark'); return true; } catch{ return false; } }, cmd: 'echo "wireshark-common wireshark-common/install-setuid boolean true" | debconf-set-selections && apt-get update && apt-get install -y wireshark' },
+  nmap: { check: () => { try { execSync('which nmap'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y nmap' },
+  gobuster: { check: () => { try { execSync('which gobuster'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y gobuster' },
+  firefox: { check: () => { try { execSync('which firefox'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y firefox' },
+  redis: { check: () => { try { execSync('which redis-cli'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y redis-tools' }
 };
 
 app.get('/api/market/status', (req, res) => {

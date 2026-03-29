@@ -20,7 +20,8 @@ import {
   Pin,
   PinOff,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Activity
 } from 'lucide-react';
 
 const TOOLS = [
@@ -38,6 +39,7 @@ const TOOLS = [
   { id: 'windows', icon: <Monitor />, color: 'orange', label: 'tool_windows', desc: 'c_windows' },
   { id: 'aws', icon: <Cloud />, color: 'yellow', label: 'tool_aws', desc: 'c_aws' },
   { id: 'grep', icon: <Layers />, color: 'cyan', label: 'tool_grep', desc: 'c_grep' },
+  { id: 'wireshark', icon: <Activity />, color: 'blue', label: 'tool_wireshark', desc: 'c_wireshark' },
 ];
 
 export default function HomePage({ onNavigate }) {

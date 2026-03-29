@@ -1,27 +1,53 @@
 import { useState, useEffect, useRef } from 'react';
-import { Download, Terminal, Settings2 } from 'lucide-react';
+import { Download, Terminal, Settings2, Search, CheckCircle2, Loader2, PackageSearch } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
 import { useLanguage } from '../context/LanguageContext';
 
 const PACKAGES = [
-  { id: 'nmap', name: 'Nmap', cmd: 'nmap', descKey: 'pkg_nmap' },
-  { id: 'ftp', name: 'FTP', cmd: 'ftp', descKey: 'pkg_ftp' },
-  { id: 'firefox', name: 'Firefox', cmd: 'firefox', descKey: 'pkg_firefox' },
-  { id: 'gobuster', name: 'Gobuster', cmd: 'gobuster', descKey: 'pkg_gobuster' },
-  { id: 'smbclient', name: 'Smbclient', cmd: 'smbclient', descKey: 'pkg_smbclient' },
-  { id: 'redis-tools', name: 'Redis CLI', cmd: 'redis-tools', descKey: 'pkg_redis' },
+  { id: 'nmap', name: 'Nmap', descKey: 'c_nmap' },
+  { id: 'ftp', name: 'FTP', descKey: 'c_ftp' },
+  { id: 'firefox', name: 'Firefox', descKey: 'pkg_firefox' },
+  { id: 'gobuster', name: 'Gobuster', descKey: 'c_gobuster' },
+  { id: 'smbclient', name: 'Smbclient', descKey: 'c_smbclient' },
+  { id: 'redis', name: 'Redis CLI', descKey: 'c_redis' },
+  { id: 'wireshark', name: 'Wireshark', descKey: 'c_wireshark' },
+  { id: 'nc', name: 'Netcat (nc)', descKey: 'nc_desc' },
+  { id: 'mysql', name: 'MySQL Client', descKey: 'mysql_desc' },
+  { id: 'john', name: 'John the Ripper', descKey: 'john_desc' },
+  { id: 'hashcat', name: 'Hashcat', descKey: 'hashcat_desc' },
+  { id: 'awscli', name: 'AWS CLI', descKey: 'aws_desc' },
+  { id: 'impacket', name: 'Impacket', descKey: 'impacket_desc' },
+  { id: 'evilwinrm', name: 'Evil-WinRM', descKey: 'evil_winrm_desc' },
+  { id: 'responder', name: 'Responder', descKey: 'responder_desc' }
 ];
 
 export default function PackagesPage() {
   const [logs, setLogs] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
+  const [marketStatus, setMarketStatus] = useState({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [installingTool, setInstallingTool] = useState(null);
+  
   const { socket } = useSocket();
   const { t } = useLanguage();
   const logEndRef = useRef(null);
+  const termId = 'market-install-logs';
+
+  const fetchStatus = async () => {
+    try {
+      const res = await fetch('/api/market/status');
+      if (res.ok) {
+        const data = await res.json();
+        setMarketStatus(data);
+      }
+    } catch (e) {}
+  };
 
   useEffect(() => {
-    if (!socket) return;
-    
+    fetchStatus();
+  }, []);
+
+  useEffect(() => {
     const handleLog = (data) => {
       setLogs(prev => [...prev, data]);
       setTimeout(() => {
@@ -29,30 +55,42 @@ export default function PackagesPage() {
       }, 50);
     };
     
-    const handleDone = (code) => {
-      setLogs(prev => [...prev, `\n\r>>> ${t('pkg_done')} (${code}) <<<\n\r`]);
-      setIsRunning(false);
-    };
-
-    socket.on('package:log', handleLog);
-    socket.on('package:done', handleDone);
+    if (socket) {
+      socket.on(`terminal:data:${termId}`, handleLog);
+    }
 
     return () => {
-      socket.off('package:log', handleLog);
-      socket.off('package:done', handleDone);
+      if (socket) {
+        socket.off(`terminal:data:${termId}`, handleLog);
+      }
     };
-  }, [socket, t]);
+  }, [socket, t, termId]);
 
-  const sendCommand = (action, pkg) => {
+  const sendInstall = async (toolId, name) => {
     if (isRunning) return;
     setIsRunning(true);
-    setLogs([`\n\r>>> ${t('pkg_starting')}: apt-get ${action} ${pkg || ''} <<<\n\r`]);
-    fetch('/api/packages/install', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action, pkg })
-    });
+    setInstallingTool(toolId);
+    setLogs([`\n\r>>> ${name} ${t('installing') || 'Yükleniyor'}... <<<\n\r`]);
+    
+    try {
+      await fetch('/api/market/install', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tool: toolId, termId })
+      });
+    } catch (e) {}
+    
+    // We don't have a direct 'done' callback from market/install 
+    // yet but we can assume it's running. The logs will finish it.
+    // For UI simplicity, we keep isRunning true until something happens or just poll.
+    setTimeout(fetchStatus, 5000); 
+    setTimeout(() => setIsRunning(false), 30000); // safety reset
   };
+
+  const filteredPackages = PACKAGES.filter(p => 
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    t(p.descKey).toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -63,27 +101,70 @@ export default function PackagesPage() {
         </div>
       </div>
       
-      <div style={{ padding: '0 20px', display: 'flex', gap: 12, marginBottom: 24 }}>
-        <button className="btn-pro btn-outline" disabled={isRunning} onClick={() => sendCommand('update')}>
-          <Settings2 size={16} /> {t('pkg_update')}
-        </button>
-        <button className="btn-pro btn-cyan" disabled={isRunning} onClick={() => sendCommand('upgrade')}>
-          <Download size={16} /> {t('pkg_upgrade')}
-        </button>
+      <div style={{ padding: '0 20px', marginBottom: 24, position: 'relative' }}>
+        <div style={{ position: 'absolute', left: 36, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
+          <Search size={18} />
+        </div>
+        <input 
+          type="text" 
+          placeholder={t('search_tools_market') || 'Market içerisinde ara...'} 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="glass-input"
+          style={{
+            width: '100%',
+            padding: '12px 16px 12px 48px',
+            fontSize: 14,
+            borderRadius: 12,
+            background: 'var(--panel-bg)',
+            border: '1px solid var(--border)',
+            color: 'var(--text-primary)'
+          }}
+        />
       </div>
 
       <div className="notes-grid" style={{ padding: '0 20px', marginBottom: 24 }}>
-        {PACKAGES.map(p => (
-          <div key={p.id} className="note-card glass-card" style={{ minHeight: 140 }}>
+        {filteredPackages.map(p => (
+          <div key={p.id} className="note-card glass-card" style={{ minHeight: 140, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
-              <div className="note-card-header" style={{ fontSize: 15 }}>{p.name}</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <div className="note-card-header" style={{ fontSize: 15, margin: 0 }}>{p.name}</div>
+                {marketStatus[p.id] && <CheckCircle2 size={16} style={{ color: 'var(--accent-green)' }} />}
+              </div>
               <div className="note-card-excerpt" style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t(p.descKey)}</div>
             </div>
-            <button className="btn-pro btn-cyan btn-xs btn-full" disabled={isRunning} onClick={() => sendCommand('install', p.cmd)} style={{ marginTop: 12 }}>
-              <Download size={12} /> {t('install')} ({p.cmd})
-            </button>
+            
+            {marketStatus[p.id] ? (
+              <div style={{ 
+                marginTop: 12, 
+                padding: '6px 12px', 
+                borderRadius: 8, 
+                background: 'rgba(0,255,136,0.05)', 
+                color: 'var(--accent-green)',
+                fontSize: 11,
+                fontWeight: 600,
+                textAlign: 'center',
+                border: '1px solid rgba(0,255,136,0.1)'
+              }}>
+                {t('installed') || 'KURULU'}
+              </div>
+            ) : (
+              <button 
+                className="btn-pro btn-cyan btn-xs btn-full" 
+                disabled={isRunning} 
+                onClick={() => sendInstall(p.id, p.name)}
+                style={{ marginTop: 12, background: 'transparent', border: '1px solid var(--accent-cyan)', color: 'var(--accent-cyan)' }}
+              >
+                {isRunning && installingTool === p.id ? <Loader2 size={12} className="spin" /> : <><Download size={12} /> {t('install')}</>}
+              </button>
+            )}
           </div>
         ))}
+        {filteredPackages.length === 0 && (
+          <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
+            {t('no_tools_found')}
+          </div>
+        )}
       </div>
 
       {/* Embedded Log Terminal */}
