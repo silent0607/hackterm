@@ -74,9 +74,9 @@ export default function BurpPage({ onBack }) {
   };
 
   // Main desktop/Burp session (Port 6080)
-  const vncUrl = `http://${window.location.hostname}:6080${envInfo.desktopPath}/vnc.html?host=${window.location.hostname}&port=6080&autoconnect=true`;
+  const vncUrl = `http://${window.location.hostname}:6080${envInfo.desktopPath}/vnc.html?host=${window.location.hostname}&port=6080&autoconnect=true&view_only=false`;
   // Dedicated Firefox session (Port 6081)
-  const firefoxUrl = `http://${window.location.hostname}:6081${envInfo.desktopPath}/vnc.html?host=${window.location.hostname}&port=6081&autoconnect=true`;
+  const firefoxUrl = `http://${window.location.hostname}:6081${envInfo.desktopPath}/vnc.html?host=${window.location.hostname}&port=6081&autoconnect=true&view_only=false`;
 
   const handleUpload = async (e) => {
     const file = e.target.files[0];
