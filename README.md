@@ -121,9 +121,9 @@ server {
         proxy_set_header Connection "upgrade";
         proxy_set_header Host $host;
         
-        # BEYAZ EKRAN & TERMİNAL FİX / UI STABILITY (CSP v5.5)
+        # BEYAZ EKRAN & TERMİNAL FİX / KARARLI ARAYÜZ (CSP v5.7)
         proxy_hide_header Content-Security-Policy;
-        add_header Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' wss: ws: https:; frame-src 'self' https: http:; img-src 'self' data: https:;";
+        add_header Content-Security-Policy "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors 'self';";
         
         proxy_read_timeout 86400s;
     }
