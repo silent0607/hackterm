@@ -1,33 +1,17 @@
-import { useRef } from 'react';
-import { useTerminal } from '../hooks/useTerminal';
+import { useState } from 'react';
+import { useJobs } from '../context/JobContext';
+import { useSocket } from '../context/SocketContext';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
-import { useSocket } from '../context/SocketContext';
-
-const termId = 'grep-main';
-
-function GrepTerm() {
-  const containerRef = useRef(null);
-  const { isReady } = useTerminal(termId, containerRef);
-  return (
-    <div className="terminal-container" style={{ height: 230 }}>
-      <div className="terminal-titlebar">
-        <div className="terminal-dots">
-          <div className="terminal-dot red" /><div className="terminal-dot yellow" /><div className="terminal-dot green" />
-        </div>
-        <div className="terminal-title">
-          {isReady ? <span style={{ color: 'var(--accent-green)' }}>● grep</span> : <span style={{ color: 'var(--text-muted)' }}>○ bağlanıyor...</span>}
-        </div>
-      </div>
-      <div ref={containerRef} style={{ height: 192, padding: '4px 2px' }} />
-    </div>
-  );
-}
+import Terminal from '../components/Terminal';
 
 export default function GrepPage({ onBack }) {
+  const { activeJobId } = useJobs();
   const { socket } = useSocket();
+  const termId = `grep-${activeJobId || 'default'}`;
+
   return (
-    <div>
+    <div style={{ paddingBottom: 40 }}>
       <div className="page-header">
         <div>
           <div className="page-header-back" onClick={onBack}>← Ana Menü</div>
@@ -36,9 +20,9 @@ export default function GrepPage({ onBack }) {
         </div>
       </div>
 
-      <GrepTerm />
+      <Terminal id={termId} title="Grep Terminal" height={240} />
 
-      <div style={{ marginTop: 16 }}>
+      <div style={{ marginTop: 24 }}>
         <SectionTitle icon="📋">Grep Bayrak Referansı</SectionTitle>
         <InfoCard title="Temel Bayraklar" icon="🏳" defaultOpen color="green">
           <div className="cmd-desc">

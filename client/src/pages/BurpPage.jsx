@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { InfoCard, SectionTitle } from '../components/InfoCard';
-import { Monitor, Upload, Play, Package, ExternalLink, ShieldCheck, Terminal as TerminalIcon } from 'lucide-react';
+import { Monitor, Upload, Play, Package, ExternalLink, ShieldCheck, Terminal as TerminalIcon, Chrome } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function BurpPage({ onBack }) {
@@ -58,7 +58,10 @@ export default function BurpPage({ onBack }) {
     return () => socket.off('package:log', handleLog);
   }, [socket]);
 
-  const vncUrl = `http://${window.location.hostname}:${envInfo.novncPort}${envInfo.desktopPath}/vnc.html?host=${window.location.hostname}&port=${envInfo.novncPort}&autoconnect=true`;
+  // Main desktop/Burp session (Port 6080)
+  const vncUrl = `http://${window.location.hostname}:6080${envInfo.desktopPath}/vnc.html?host=${window.location.hostname}&port=6080&autoconnect=true`;
+  // Dedicated Firefox session (Port 6081)
+  const firefoxUrl = `http://${window.location.hostname}:6081${envInfo.desktopPath}/vnc.html?host=${window.location.hostname}&port=6081&autoconnect=true`;
 
   const handleUpload = async (e) => {
     const file = e.target.files[0];
@@ -97,9 +100,9 @@ export default function BurpPage({ onBack }) {
   const handleLaunchFirefox = async () => {
     try {
       await fetch('/api/firefox/launch', { method: 'POST' });
-      window.open(vncUrl, '_blank');
+      window.open(firefoxUrl, '_blank');
     } catch (e) {
-      window.open(vncUrl, '_blank');
+      window.open(firefoxUrl, '_blank');
     }
   };
 
@@ -153,18 +156,23 @@ export default function BurpPage({ onBack }) {
             <div style={{ textAlign: 'center', marginBottom: 16 }}>
               {t('desktop_access_desc')}
             </div>
-            <button onClick={handleLaunchFirefox} className="btn btn-purple" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-              <ExternalLink size={16} /> {t('desktop_open')}
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <button onClick={() => window.open(vncUrl, '_blank')} className="btn btn-cyan" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <Monitor size={16} /> {t('desktop_open')} (Burp Session)
+                </button>
+                <button onClick={handleLaunchFirefox} className="btn btn-purple" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <Chrome size={16} /> Firefox'u Aç (Port 6081)
+                </button>
+            </div>
             
             <div style={{ marginTop: 24 }}>
               <SectionTitle icon={<ShieldCheck size={14} />}>{t('burp_ca_title')}</SectionTitle>
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
                 <p style={{ fontSize: 12, marginBottom: 8 }}>{t('burp_ca_desc')}</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                   <a href={vncUrl} target="_blank" className="btn btn-xs btn-ghost" style={{ width: '100%' }}>
+                   <button onClick={handleLaunchFirefox} className="btn btn-xs btn-ghost" style={{ width: '100%' }}>
                      {t('firefox_open')}
-                   </a>
+                   </button>
                    <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
                      {t('go_to_burp')}
                    </div>

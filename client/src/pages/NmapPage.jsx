@@ -1,29 +1,10 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useJobs } from '../context/JobContext';
 import { useSocket } from '../context/SocketContext';
-import { useTerminal } from '../hooks/useTerminal';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
 import { useLanguage } from '../context/LanguageContext';
-
-function NmapTerminal({ jobId }) {
-  const termId = `nmap-${jobId || 'default'}`;
-  const containerRef = useRef(null);
-  const { isReady } = useTerminal(termId, containerRef);
-  return (
-    <div className="terminal-container" style={{ height: 280 }}>
-      <div className="terminal-titlebar">
-        <div className="terminal-dots">
-          <div className="terminal-dot red" /><div className="terminal-dot yellow" /><div className="terminal-dot green" />
-        </div>
-        <div className="terminal-title">
-          {isReady ? <span style={{ color: 'var(--accent-green)' }}>● nmap</span> : <span style={{ color: 'var(--text-muted)' }}>○ bağlanıyor...</span>}
-        </div>
-      </div>
-      <div ref={containerRef} style={{ height: 242, padding: '4px 2px' }} />
-    </div>
-  );
-}
+import Terminal from '../components/Terminal';
 
 export default function NmapPage({ onBack }) {
   const { activeJob, activeJobId, updateJob } = useJobs();
@@ -85,7 +66,7 @@ export default function NmapPage({ onBack }) {
         <span><b>Versiyon tarama:</b> Önce hızlı tara, açık portları gir → sadece o portların servis/versiyon bilgisini al</span>
       </div>
 
-      <NmapTerminal jobId={activeJobId} />
+      <Terminal id={termId} title="Nmap Terminal" />
 
       <div style={{ marginTop: 20 }}>
         <SectionTitle icon="📋">Nmap Komut Referansı</SectionTitle>

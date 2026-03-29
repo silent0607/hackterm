@@ -1,29 +1,9 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
+import { useJobs } from '../context/JobContext';
 import { useSocket } from '../context/SocketContext';
-import { useTerminal } from '../hooks/useTerminal';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
-
-const johnTermId = 'john-main';
-const hashTermId = 'hash-main';
-
-function ToolTerm({ id, label }) {
-  const containerRef = useRef(null);
-  const { isReady } = useTerminal(id, containerRef);
-  return (
-    <div className="terminal-container" style={{ height: 230 }}>
-      <div className="terminal-titlebar">
-        <div className="terminal-dots">
-          <div className="terminal-dot red" /><div className="terminal-dot yellow" /><div className="terminal-dot green" />
-        </div>
-        <div className="terminal-title">
-          {isReady ? <span style={{ color: 'var(--accent-green)' }}>● {label}</span> : <span style={{ color: 'var(--text-muted)' }}>○ bağlanıyor...</span>}
-        </div>
-      </div>
-      <div ref={containerRef} style={{ height: 192, padding: '4px 2px' }} />
-    </div>
-  );
-}
+import Terminal from '../components/Terminal';
 
 const HASH_TYPES = [
   { label: 'MD5', john: 'raw-md5', hashcat: '0' },
@@ -36,16 +16,20 @@ const HASH_TYPES = [
 ];
 
 export default function JohnPage({ onBack }) {
+  const { activeJobId } = useJobs();
   const { socket } = useSocket();
   const [hashFile, setHashFile] = useState('hash.txt');
   const [wordlist, setWordlist] = useState('/usr/share/wordlists/rockyou.txt');
   const [hashType, setHashType] = useState('');
   const [tab, setTab] = useState('john');
 
+  const johnTermId = `john-${activeJobId || 'default'}`;
+  const hashTermId = `hashcat-${activeJobId || 'default'}`;
+
   const selected = HASH_TYPES.find(h => h.label === hashType);
 
   return (
-    <div>
+    <div style={{ paddingBottom: 40 }}>
       <div className="page-header">
         <div>
           <div className="page-header-back" onClick={onBack}>← Ana Menü</div>
@@ -64,7 +48,7 @@ export default function JohnPage({ onBack }) {
 
       {tab === 'john' && (
         <>
-          <div style={{ display: 'flex', gap: 10, marginBottom: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
             <div className="form-group" style={{ flex: 1 }}>
               <label className="form-label">Hash Dosyası</label>
               <input className="form-input" value={hashFile} onChange={e => setHashFile(e.target.value)} />
@@ -82,20 +66,20 @@ export default function JohnPage({ onBack }) {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
-            <button className="btn btn-green" onClick={() => {
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+            <button className="btn-pro btn-green" onClick={() => {
               const fmt = selected ? ` --format=${selected.john}` : '';
               sendCmd(socket, johnTermId, `john ${hashFile} --wordlist=${wordlist}${fmt}`);
             }}>⚔ Kır</button>
-            <button className="btn btn-cyan" onClick={() => sendCmd(socket, johnTermId, `john --show ${hashFile}`)}>
+            <button className="btn-pro btn-cyan" onClick={() => sendCmd(socket, johnTermId, `john --show ${hashFile}`)}>
               👁 Sonuçları Göster
             </button>
-            <button className="btn btn-ghost btn-sm" onClick={() => sendCmd(socket, johnTermId, `john --list=formats`)}>
+            <button className="btn-pro btn-ghost btn-sm" onClick={() => sendCmd(socket, johnTermId, `john --list=formats`)}>
               📋 Format Listesi
             </button>
           </div>
 
-          <ToolTerm id={johnTermId} label="john" />
+          <Terminal id={johnTermId} title="John Terminal" height={240} />
 
           <SectionTitle icon="📋">John Referansı</SectionTitle>
           <InfoCard title="Temel Komutlar" icon="⚔" defaultOpen color="green">
@@ -117,7 +101,7 @@ export default function JohnPage({ onBack }) {
 
       {tab === 'hashcat' && (
         <>
-          <div style={{ display: 'flex', gap: 10, marginBottom: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
             <div className="form-group" style={{ flex: 1 }}>
               <label className="form-label">Hash Dosyası</label>
               <input className="form-input" value={hashFile} onChange={e => setHashFile(e.target.value)} />
@@ -135,17 +119,17 @@ export default function JohnPage({ onBack }) {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
-            <button className="btn btn-orange" onClick={() => {
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+            <button className="btn-pro btn-orange" onClick={() => {
               const m = selected ? selected.hashcat : '0';
               sendCmd(socket, hashTermId, `hashcat -m ${m} ${hashFile} ${wordlist} --force`);
             }}>💣 Kır</button>
-            <button className="btn btn-cyan" onClick={() => sendCmd(socket, hashTermId, `hashcat -m ${selected?.hashcat || '0'} ${hashFile} --show`)}>
+            <button className="btn-pro btn-cyan" onClick={() => sendCmd(socket, hashTermId, `hashcat -m ${selected?.hashcat || '0'} ${hashFile} --show`)}>
               👁 Sonuçları Göster
             </button>
           </div>
 
-          <ToolTerm id={hashTermId} label="hashcat" />
+          <Terminal id={hashTermId} title="Hashcat Terminal" height={240} />
 
           <SectionTitle icon="📋">Hashcat Referansı</SectionTitle>
           <InfoCard title="Bayraklar & Modlar" icon="🏳" defaultOpen color="orange">

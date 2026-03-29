@@ -1,24 +1,21 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useJobs } from '../context/JobContext';
 import { useSocket } from '../context/SocketContext';
-import { useTerminal } from '../hooks/useTerminal';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
 import { useLanguage } from '../context/LanguageContext';
-
-const termId = 'shell-main';
+import Terminal from '../components/Terminal';
 
 export default function PhpShellPage({ onBack }) {
   const { t } = useLanguage();
-  const { activeJob, updateJob } = useJobs();
+  const { activeJob, activeJobId, updateJob } = useJobs();
   const { socket } = useSocket();
   const [myIp, setMyIp] = useState('10.10.x.x');
   const [port, setPort] = useState('4444');
   const [targetIp, setTargetIp] = useState(activeJob?.ip || '');
   const [tab, setTab] = useState('shells');
 
-  const containerRef = useRef(null);
-  const { isReady } = useTerminal(termId, containerRef);
+  const termId = `shell-${activeJobId || 'default'}`;
 
   const SHELLS = [
     {
@@ -53,7 +50,7 @@ export default function PhpShellPage({ onBack }) {
   const listen = () => sendCmd(socket, termId, `nc -lnvp ${port}`);
 
   return (
-    <div>
+    <div style={{ paddingBottom: 40 }}>
       <div className="page-header">
         <div>
           <div className="page-header-back" onClick={onBack}>{t('back_to_menu')}</div>
@@ -81,22 +78,12 @@ export default function PhpShellPage({ onBack }) {
               <label className="form-label">{t('port_listen')}</label>
               <input className="form-input" value={port} onChange={e => setPort(e.target.value)} style={{ width: 90 }} />
             </div>
-            <button className="btn btn-green" onClick={listen}>👂 {t('nc_listen').split(' ')[1]}</button>
+            <button className="btn-pro btn-green" style={{ height: 38 }} onClick={listen}>👂 {t('nc_listen')}</button>
           </div>
 
-          <div className="terminal-container" style={{ height: 220, marginBottom: 16 }}>
-            <div className="terminal-titlebar">
-              <div className="terminal-dots">
-                <div className="terminal-dot red" /><div className="terminal-dot yellow" /><div className="terminal-dot green" />
-              </div>
-              <div className="terminal-title">
-                {isReady ? <span style={{ color: 'var(--accent-green)' }}>● nc {t('listener_nc').split(' ')[1]}</span> : <span style={{ color: 'var(--text-muted)' }}>○ {t('connecting')}</span>}
-              </div>
-            </div>
-            <div ref={containerRef} style={{ height: 182, padding: '4px 2px' }} />
-          </div>
+          <Terminal id={termId} title="Netcat Listener" height={240} />
 
-          <div style={{ marginTop: 16 }}>
+          <div style={{ marginTop: 24 }}>
             {SHELLS.map(s => (
               <div key={s.id} className="info-panel" style={{ marginBottom: 12 }}>
                 <div className="info-panel-header" style={{ cursor: 'default', color: `var(--accent-${s.color === 'green' ? 'green' : s.color === 'cyan' ? 'cyan' : 'purple'})` }}>

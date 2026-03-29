@@ -11,6 +11,7 @@ services:
     ports:
       - "${HACKTERM_PORT:-3001}:3001"
       - "${NOVNC_PORT:-6080}:6080"
+      - "6081:6081"
     volumes:
       - downloads_data:/app/downloads
       - tools_data:/app/.tools

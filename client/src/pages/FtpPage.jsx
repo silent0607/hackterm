@@ -1,38 +1,18 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useJobs } from '../context/JobContext';
 import { useSocket } from '../context/SocketContext';
-import { useTerminal } from '../hooks/useTerminal';
 import { useLanguage } from '../context/LanguageContext';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
-
-const termId = 'ftp-main';
-
-function FtpTerminal() {
-  const containerRef = useRef(null);
-  const { isReady } = useTerminal(termId, containerRef);
-  const { t } = useLanguage();
-  return (
-    <div className="terminal-container" style={{ height: 280 }}>
-      <div className="terminal-titlebar">
-        <div className="terminal-dots">
-          <div className="terminal-dot red" /><div className="terminal-dot yellow" /><div className="terminal-dot green" />
-        </div>
-        <div className="terminal-title">
-          {isReady ? <span style={{ color: 'var(--accent-green)' }}>● ftp</span> : <span style={{ color: 'var(--text-muted)' }}>○ {t('connecting')}</span>}
-        </div>
-      </div>
-      <div ref={containerRef} style={{ height: 242, padding: '4px 2px' }} />
-    </div>
-  );
-}
+import Terminal from '../components/Terminal';
 
 export default function FtpPage({ onBack }) {
-  const { activeJob, updateJob } = useJobs();
+  const { activeJob, activeJobId, updateJob } = useJobs();
   const { socket } = useSocket();
   const { t } = useLanguage();
   const [ip, setIp] = useState(activeJob?.ip || '');
-  const [pass, setPass] = useState('anonymous');
+
+  const termId = `ftp-${activeJobId || 'default'}`;
 
   const connect = () => {
     const target = ip || activeJob?.ip || '';
@@ -63,10 +43,10 @@ export default function FtpPage({ onBack }) {
         </div>
       </div>
 
-      <div className="ip-bar">
+      <div className="ip-bar" style={{ marginBottom: 16 }}>
         <span className="ip-bar-label">🎯 {t('target_ip_label')}</span>
-        <input value={ip} onChange={e => { setIp(e.target.value); if (activeJob) updateJob(activeJob.id, { ip: e.target.value }); }}
-          placeholder={activeJob?.ip || '10.10.10.10'} />
+        <input className="form-input" value={ip} onChange={e => { setIp(e.target.value); if (activeJob) updateJob(activeJob.id, { ip: e.target.value }); }}
+          placeholder={activeJob?.ip || '10.10.10.10'} style={{ height: 38 }} />
       </div>
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
@@ -74,9 +54,9 @@ export default function FtpPage({ onBack }) {
         <button className="btn-pro btn-cyan" onClick={connectAnon}>👤 {t('ftp_connect_anon')}</button>
       </div>
 
-      <FtpTerminal />
+      <Terminal id={termId} title="FTP Terminal" height={300} />
 
-      <div style={{ marginTop: 20 }}>
+      <div style={{ marginTop: 24 }}>
         <SectionTitle icon="📋">{t('ftp_commands_ref')}</SectionTitle>
         <InfoCard title={t('ftp_browse')} icon="📂" defaultOpen color="green">
           <CmdLine cmd="ls" desc={t('ftp_ls')} termId={termId} />

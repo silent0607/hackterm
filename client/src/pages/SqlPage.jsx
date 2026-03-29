@@ -1,32 +1,12 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useJobs } from '../context/JobContext';
 import { useSocket } from '../context/SocketContext';
-import { useTerminal } from '../hooks/useTerminal';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
-
-const mysqlTermId = 'mysql-main';
-
-function SqlTerminal() {
-  const containerRef = useRef(null);
-  const { isReady } = useTerminal(mysqlTermId, containerRef);
-  return (
-    <div className="terminal-container" style={{ height: 260 }}>
-      <div className="terminal-titlebar">
-        <div className="terminal-dots">
-          <div className="terminal-dot red" /><div className="terminal-dot yellow" /><div className="terminal-dot green" />
-        </div>
-        <div className="terminal-title">
-          {isReady ? <span style={{ color: 'var(--accent-green)' }}>● mysql</span> : <span style={{ color: 'var(--text-muted)' }}>○ bağlanıyor...</span>}
-        </div>
-      </div>
-      <div ref={containerRef} style={{ height: 222, padding: '4px 2px' }} />
-    </div>
-  );
-}
+import Terminal from '../components/Terminal';
 
 export default function SqlPage({ onBack }) {
-  const { activeJob, updateJob } = useJobs();
+  const { activeJob, activeJobId, updateJob } = useJobs();
   const { socket } = useSocket();
   const [ip, setIp] = useState(activeJob?.ip || '');
   const [user, setUser] = useState('root');
@@ -34,19 +14,21 @@ export default function SqlPage({ onBack }) {
   const [port, setPort] = useState('3306');
   const [tab, setTab] = useState('mysql');
 
+  const termId = `sql-${activeJobId || 'default'}`;
+
   const connect = () => {
     const target = ip || activeJob?.ip || '127.0.0.1';
     if (target && activeJob) updateJob(activeJob.id, { ip: target });
     if (tab === 'mysql') {
       const pFlag = pass ? ` -p${pass}` : ' -p';
-      sendCmd(socket, mysqlTermId, `mysql -h ${target} -P ${port} -u ${user}${pFlag}`);
+      sendCmd(socket, termId, `mysql -h ${target} -P ${port} -u ${user}${pFlag}`);
     } else if (tab === 'sqli') {
-      sendCmd(socket, mysqlTermId, `sqlmap -u "http://${target}/page.php?id=1" --dbs`);
+      sendCmd(socket, termId, `sqlmap -u "http://${target}/page.php?id=1" --dbs`);
     }
   };
 
   return (
-    <div>
+    <div style={{ paddingBottom: 40 }}>
       <div className="page-header">
         <div>
           <div className="page-header-back" onClick={onBack}>← Ana Menü</div>
@@ -67,10 +49,10 @@ export default function SqlPage({ onBack }) {
         <>
           <div className="ip-bar">
             <span className="ip-bar-label">🎯 Host</span>
-            <input value={ip} onChange={e => { setIp(e.target.value); if (activeJob) updateJob(activeJob.id, { ip: e.target.value }); }}
-              placeholder={activeJob?.ip || '10.10.10.10'} style={{ flex: 1 }} />
+            <input className="form-input" value={ip} onChange={e => { setIp(e.target.value); if (activeJob) updateJob(activeJob.id, { ip: e.target.value }); }}
+              placeholder={activeJob?.ip || '10.10.10.10'} style={{ flex: 1, height: 38 }} />
             <span style={{ color: 'var(--text-muted)', fontSize: 11, fontFamily: 'JetBrains Mono' }}>Port</span>
-            <input value={port} onChange={e => setPort(e.target.value)} style={{ width: 60, background: 'transparent', border: 'none', outline: 'none', color: 'var(--text-primary)', fontFamily: 'JetBrains Mono', fontSize: 13 }} />
+            <input className="form-input" value={port} onChange={e => setPort(e.target.value)} style={{ width: 80, height: 38 }} />
           </div>
           <div style={{ display: 'flex', gap: 10, marginBottom: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
             <div className="form-group" style={{ flex: 1 }}>
@@ -81,18 +63,20 @@ export default function SqlPage({ onBack }) {
               <label className="form-label">Parola (boş = sormak ister)</label>
               <input className="form-input" value={pass} onChange={e => setPass(e.target.value)} placeholder="parola" />
             </div>
-            <button className="btn btn-green" style={{ marginBottom: 0 }} onClick={connect}>🔌 Bağlan</button>
+            <button className="btn-pro btn-green" style={{ marginBottom: 0, height: 38 }} onClick={connect}>🔌 Bağlan</button>
           </div>
-          <SqlTerminal />
+          
+          <Terminal id={termId} title="SQL Terminal" height={300} />
+
           <SectionTitle icon="📋">MySQL / MariaDB Komutları</SectionTitle>
           <InfoCard title="Temel Komutlar" icon="🗃" defaultOpen color="green">
-            <CmdLine cmd="SHOW DATABASES;" desc="Tüm veritabanlarını listele" termId={mysqlTermId} />
-            <CmdLine cmd="USE <veritabani_adi>;" desc="Veritabanını seç" termId={mysqlTermId} />
-            <CmdLine cmd="SHOW TABLES;" desc="Seçili veritabanındaki tabloları listele" termId={mysqlTermId} />
-            <CmdLine cmd="DESCRIBE <tablo_adi>;" desc="Tablonun sütun yapısını göster" termId={mysqlTermId} />
-            <CmdLine cmd="SELECT * FROM <tablo>;" desc="Tablodaki tüm verileri göster" termId={mysqlTermId} />
-            <CmdLine cmd="SELECT * FROM users;" desc="Kullanıcı tablosunu oku – sıkça kullanılır!" termId={mysqlTermId} />
-            <CmdLine cmd="SELECT user, password FROM mysql.user;" desc="MySQL dahili kullanıcıları ve hash'leri listele" termId={mysqlTermId} />
+            <CmdLine cmd="SHOW DATABASES;" desc="Tüm veritabanlarını listele" termId={termId} />
+            <CmdLine cmd="USE <veritabani_adi>;" desc="Veritabanını seç" termId={termId} />
+            <CmdLine cmd="SHOW TABLES;" desc="Seçili veritabanındaki tabloları listele" termId={termId} />
+            <CmdLine cmd="DESCRIBE <tablo_adi>;" desc="Tablonun sütun yapısını göster" termId={termId} />
+            <CmdLine cmd="SELECT * FROM <tablo>;" desc="Tablodaki tüm verileri göster" termId={termId} />
+            <CmdLine cmd="SELECT * FROM users;" desc="Kullanıcı tablosunu oku – sıkça kullanılır!" termId={termId} />
+            <CmdLine cmd="SELECT user, password FROM mysql.user;" desc="MySQL dahili kullanıcıları ve hash'leri listele" termId={termId} />
           </InfoCard>
           <InfoCard title="MariaDB vs MySQL – Ne Fark Var?" icon="ℹ" color="purple">
             <div className="cmd-desc">
@@ -117,9 +101,9 @@ export default function SqlPage({ onBack }) {
             <CmdLine cmd="' UNION SELECT 1,2,3-- " desc="UNION ile veri çekme (sütun sayısını bul)" />
           </InfoCard>
           <InfoCard title="SQLMap – Otomatik SQLi" icon="🤖" color="green">
-            <CmdLine cmd={`sqlmap -u "http://${ip || '10.10.10.10'}/page?id=1" --dbs`} desc="Veritabanlarını listele" termId={mysqlTermId} />
-            <CmdLine cmd={`sqlmap -u "http://${ip || '10.10.10.10'}/page?id=1" -D <db> --tables`} desc="Tabloları listele" termId={mysqlTermId} />
-            <CmdLine cmd={`sqlmap -u "http://${ip || '10.10.10.10'}/page?id=1" -D <db> -T users --dump`} desc="Tabloyu dump et" termId={mysqlTermId} />
+            <CmdLine cmd={`sqlmap -u "http://${ip || '10.10.10.10'}/page?id=1" --dbs`} desc="Veritabanlarını listele" termId={termId} />
+            <CmdLine cmd={`sqlmap -u "http://${ip || '10.10.10.10'}/page?id=1" -D <db> --tables`} desc="Tabloları listele" termId={termId} />
+            <CmdLine cmd={`sqlmap -u "http://${ip || '10.10.10.10'}/page?id=1" -D <db> -T users --dump`} desc="Tabloyu dump et" termId={termId} />
           </InfoCard>
         </>
       )}

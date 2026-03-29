@@ -178,11 +178,11 @@ app.post('/api/packages/install', (req, res) => {
 });
 
 app.post('/api/firefox/launch', (req, res) => {
-  spawn('sh', ['-c', 'firefox'], {
-    env: { ...process.env, DISPLAY: ':1' },
+  spawn('sh', ['-c', 'firefox --disable-gpu --no-sandbox'], {
+    env: { ...process.env, DISPLAY: ':2' },
     detached: true
   }).unref();
-  res.json({ message: 'Firefox başlatıldı' });
+  res.json({ message: 'Firefox başlatıldı (Display :2)' });
 });
 
 // Burp Endpoints
