@@ -121,14 +121,14 @@ server {
         proxy_set_header Connection "upgrade";
         proxy_set_header Host $host;
         
-        # BEYAZ EKRAN FİX / WHITE SCREEN FIX (CSP)
+        # BEYAZ EKRAN & TERMİNAL FİX / UI STABILITY (CSP v5.5)
         proxy_hide_header Content-Security-Policy;
-        add_header Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' wss: ws:;";
+        add_header Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' wss: ws: https:; frame-src 'self' https: http:; img-src 'self' data: https:;";
         
         proxy_read_timeout 86400s;
     }
 
-    # Cloudflare-Friendly VNC Tunnels
+    # Cloudflare-Friendly VNC Tunnels (GUI Access)
     location /vnc6080/ { proxy_pass http://127.0.0.1:6080/; proxy_http_version 1.1; proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection "upgrade"; }
     location /vnc6081/ { proxy_pass http://127.0.0.1:6081/; proxy_http_version 1.1; proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection "upgrade"; }
     location /vnc6082/ { proxy_pass http://127.0.0.1:6082/; proxy_http_version 1.1; proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection "upgrade"; }

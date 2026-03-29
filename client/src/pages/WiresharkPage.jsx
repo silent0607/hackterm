@@ -14,7 +14,11 @@ export default function WiresharkPage({ onBack }) {
   const termId = `wireshark-${activeJobId || 'default'}`;
 
   // Wireshark is on Port 6082 (Display :3)
-  const vncUrl = `http://${window.location.hostname}:6082/desktop/vnc.html?host=${window.location.hostname}&port=6082&autoconnect=true&view_only=false`;
+  // SSL/Nginx Cloudflare Aware VNC Urls
+  const isProxied = window.location.port === ""; 
+  const vncUrl = isProxied 
+    ? `${window.location.origin}/vnc6082/vnc.html?path=vnc6082/websockify&autoconnect=true&view_only=false`
+    : `http://${window.location.hostname}:6082/vnc.html?path=websockify&autoconnect=true&view_only=false`;
 
   const handleLaunch = () => {
     setRunning(true);

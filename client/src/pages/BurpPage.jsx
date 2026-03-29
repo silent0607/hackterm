@@ -73,10 +73,16 @@ export default function BurpPage({ onBack }) {
     } catch (e) {} finally { setRunning(false); }
   };
 
-  // Main desktop/Burp session (Port 6080)
-  const vncUrl = `http://${window.location.hostname}:6080${envInfo.desktopPath}/vnc.html?host=${window.location.hostname}&port=6080&autoconnect=true&view_only=false`;
-  // Dedicated Firefox session (Port 6081)
-  const firefoxUrl = `http://${window.location.hostname}:6081${envInfo.desktopPath}/vnc.html?host=${window.location.hostname}&port=6081&autoconnect=true&view_only=false`;
+  // SSL/Nginx Cloudflare Aware VNC Urls
+  const getVncUrl = (port) => {
+    const isProxied = window.location.port === ""; // No port means 80/443 (proxied)
+    const base = isProxied ? `${window.location.origin}/vnc${port}/` : `http://${window.location.hostname}:${port}/`;
+    const wsPath = isProxied ? `vnc${port}/websockify` : 'websockify';
+    return `${base}vnc.html?path=${wsPath}&autoconnect=true&view_only=false`;
+  };
+
+  const vncUrl = getVncUrl('6080');
+  const firefoxUrl = getVncUrl('6081');
 
   const handleUpload = async (e) => {
     const file = e.target.files[0];
