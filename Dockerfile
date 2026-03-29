@@ -71,6 +71,9 @@ rm -f /tmp/.X1-lock\n\
 dbus-daemon --system --fork\n\
 Xvfb :1 -screen 0 1920x1080x24 &\n\
 sleep 2\n\
+# Handle VNC Password\n\
+mkdir -p /root/.vnc\n\
+x11vnc -storepasswd ${ADMIN_PASS:-password} /root/.vnc/passwd\n\
 # Handle custom desktop path slug\n\
 SLUG=${DESKTOP_PATH:-/desktop}\n\
 CLEAN_SLUG=$(echo $SLUG | sed "s|^/||")\n\
@@ -85,8 +88,8 @@ fi\n\
 openbox-session &\n\
 # Start taskbar for window switching\n\
 tint2 &\n\
-# Better VNC flags for stability and mouse interaction\n\
-x11vnc -display :1 -nopw -forever -shared -rfbport 5901 -bg -xkb -noxrecord -noxfixes -noxdamage -repeat &\n\
+# Better VNC flags for stability and mouse interaction (with password)\n\
+x11vnc -display :1 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5901 -bg -xkb -noxrecord -noxfixes -noxdamage -repeat &\n\
 # Start websockify directly to ensure path is correct\n\
 /usr/bin/python3 /usr/bin/websockify --web /usr/share/novnc 6080 localhost:5901 &\n\
 node server/index.js' > /app/entrypoint.sh \
@@ -100,6 +103,9 @@ OVPN_DIR=/app/.ovpn\n\
 RESPONDER_PATH=/app/.tools/Responder\n\
 JOHN_PATH=/usr/bin/john\n\
 DESKTOP_PATH=\${DESKTOP_PATH:-/desktop}\n\
+ADMIN_USER=\${ADMIN_USER:-admin}\n\
+ADMIN_PASS=\${ADMIN_PASS:-password}\n\
+SESSION_SECRET=\${SESSION_SECRET:-hackterm-secret-key}\n\
 PORT=3001" > /app/server/.env
 
 EXPOSE 3001 6080

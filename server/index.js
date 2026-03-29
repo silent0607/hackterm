@@ -11,13 +11,75 @@ const fs = require('fs');
 const multer = require('multer');
 const { exec, spawn } = require('child_process');
 
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: '*', methods: ['GET', 'POST'] }
 });
 
+const ADMIN_USER = process.env.ADMIN_USER || 'admin';
+const ADMIN_PASS = process.env.ADMIN_PASS || 'password';
+const SESSION_SECRET = process.env.SESSION_SECRET || 'hackterm-secret-key';
+
+const sessionMiddleware = session({
+  secret: SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    secure: false, 
+    maxAge: 24 * 60 * 60 * 1000 
+  }
+});
+
 app.use(express.json());
+app.use(cookieParser());
+app.use(sessionMiddleware);
+
+// Middleware to protect API
+const authMiddleware = (req, res, next) => {
+  if (req.session && req.session.authenticated) return next();
+  res.status(401).json({ error: 'Unauthorized' });
+};
+
+// Login/Logout routes
+app.post('/api/login', (req, res) => {
+  const { user, pass } = req.body;
+  if (user === ADMIN_USER && pass === ADMIN_PASS) {
+    req.session.authenticated = true;
+    req.session.user = user;
+    return res.json({ success: true, user });
+  }
+  res.status(401).json({ error: 'Geçersiz kullanıcı adı veya şifre' });
+});
+
+app.post('/api/logout', (req, res) => {
+  req.session.destroy();
+  res.json({ success: true });
+});
+
+app.get('/api/me', (req, res) => {
+  if (req.session && req.session.authenticated) {
+    return res.json({ authenticated: true, user: req.session.user });
+  }
+  res.json({ authenticated: false });
+});
+
+// Protect all other API routes
+app.use('/api', (req, res, next) => {
+  if (req.path === '/login' || req.path === '/logout' || req.path === '/me') return next();
+  authMiddleware(req, res, next);
+});
+
+// Protect static files
+app.use((req, res, next) => {
+  if (req.session && req.session.authenticated) return next();
+  if (req.path === '/' || req.path.startsWith('/assets/')) return next();
+  res.redirect('/');
+});
+
 app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
 
 const PORT = process.env.PORT || 3001;
@@ -273,8 +335,19 @@ function addToBuffer(id, data) {
   }
 }
 
+// Share session with socket.io
+io.use((socket, next) => {
+  sessionMiddleware(socket.request, {}, next);
+});
+
 io.on('connection', (socket) => {
-  console.log('[+] Client bağlandı:', socket.id);
+  const session = socket.request.session;
+  if (!session || !session.authenticated) {
+    console.log('[!] Yetkisiz socket bağlantısı:', socket.id);
+    socket.disconnect();
+    return;
+  }
+  console.log('[+] Client bağlandı:', socket.id, 'User:', session.user);
 
   // --- Local PTY Terminal ---
   socket.on('terminal:create', ({ id, shell, venv }) => {

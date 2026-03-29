@@ -35,19 +35,25 @@ git clone https://github.com/silent0607/hackterm.git
 cd hackterm
 ```
 
-### 2. Configure Environment Variable (.env)
-Edit the `.env` file to set your preferred port and the secret VNC path.
+### 2. Configure Environment Variables (.env)
+Edit the `.env` file to set your preferred port, administrator credentials, and session security key.
 ```env
-HACKTERM_PORT=3001
+PORT=3001
+ADMIN_USER=admin
+ADMIN_PASS=password  # CHANGE THIS!
+SESSION_SECRET=your-secret-key-here
 DESKTOP_PATH=/desktop  # Your dynamic noVNC URL slug for security
 ```
+
+> [!WARNING]
+> **IMPORTANT SECURITY:** Change the default `admin/password` credentials before deploying to any public server. All ports (3001, 6080, 5901) are protected by this password.
 
 ### 3. Start with Docker
 The entire system functions within an isolated Docker container with zero dependency bloat on your host system.
 ```bash
 docker-compose up --build -d
 ```
-Access the dashboard at `http://your-server-ip:3001`.
+Access the dashboard at `http://your-server-ip:3001`. You will be prompted to log in.
 
 ---
 

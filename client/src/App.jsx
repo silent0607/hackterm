@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { SocketProvider, useSocket } from './context/SocketContext';
 import { JobProvider, useJobs } from './context/JobContext';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import Sidebar from './components/Sidebar';
 import RightPanel from './components/RightPanel';
+import LoginPage from './pages/LoginPage';
 
 import HomePage from './pages/HomePage';
 import TerminalPage from './pages/TerminalPage';
@@ -39,7 +41,7 @@ function JobGuard({ children }) {
   );
 }
 
-function Topbar({ rightOpen, onToggleRight }) {
+function Topbar({ rightOpen, onToggleRight, onLogout, user }) {
   const { connected } = useSocket();
   const { t } = useLanguage();
   return (
@@ -52,6 +54,10 @@ function Topbar({ rightOpen, onToggleRight }) {
           <div className={`status-dot ${connected ? '' : 'offline'}`} />
           <span>{connected ? t('connected') : t('connecting')}</span>
         </div>
+        <div className="topbar-user" style={{ fontSize: 13, color: 'var(--text-muted)', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+          👤 {user}
+          <button className="btn-pro btn-red btn-xs" onClick={onLogout} style={{ marginLeft: 8, padding: '2px 8px' }}>Çıkış</button>
+        </div>
         <button className="btn-pro btn-outline btn-sm" onClick={onToggleRight}>
           📂 {t('menu_ftp')}
         </button>
@@ -60,29 +66,7 @@ function Topbar({ rightOpen, onToggleRight }) {
   );
 }
 
-const PAGE_MAP = {
-  home:       (props) => <HomePage {...props} />,
-  terminal:   (props) => <TerminalPage {...props} />,
-  termconn:   (props) => <TerminalConnectPage {...props} />,
-  ftp:        (props) => <FtpPage {...props} />,
-  nmap:       (props) => <NmapPage {...props} />,
-  windows:    (props) => <WindowsPage {...props} />,
-  redis:      (props) => <RedisPage {...props} />,
-  gobuster:   (props) => <GobusterPage {...props} />,
-  sql:        (props) => <SqlPage {...props} />,
-  phpshell:   (props) => <PhpShellPage {...props} />,
-  network:    (props) => <NetworkPage {...props} />,
-  john:       (props) => <JohnPage {...props} />,
-  aws:        (props) => <AwsPage {...props} />,
-  openvpn:    (props) => <OpenVpnPage {...props} />,
-  burp:       (props) => <BurpPage {...props} />,
-  grep:       (props) => <GrepPage {...props} />,
-  settings:   (props) => <SettingsPage {...props} />,
-  packages:   (props) => <PackagesPage {...props} />,
-  notes:      (props) => <NotesPage {...props} />,
-};
-
-function AppInner() {
+function AppInner({ onLogout, user }) {
   const [page, setPage] = useState('home');
   const [rightOpen, setRightOpen] = useState(false);
 
@@ -91,12 +75,11 @@ function AppInner() {
 
   return (
     <div className="app-layout">
-      <Topbar rightOpen={rightOpen} onToggleRight={() => setRightOpen(o => !o)} />
+      <Topbar rightOpen={rightOpen} onToggleRight={() => setRightOpen(o => !o)} onLogout={onLogout} user={user} />
       <div className="main-container">
         <Sidebar currentPage={page} onNavigate={navigate} />
         <main className="main-content">
           <div className="page-area">
-            {/* Persist all pages by hiding them instead of unmounting */}
             <div style={{ display: page === 'home' ? 'block' : 'none', height: '100%' }}>
               <HomePage onNavigate={navigate} />
             </div>
@@ -119,7 +102,6 @@ function AppInner() {
               <SettingsPage onNavigate={navigate} onBack={goBack} />
             </div>
             
-            {/* All tool pages — persisted via display:none so terminals survive navigation */}
             {['sql', 'phpshell', 'network', 'john', 'aws', 'openvpn', 'burp', 'grep', 'redis', 'windows', 'gobuster'].map(p => (
               <div key={p} style={{ display: page === p ? 'block' : 'none', height: '100%' }}>
                 <JobGuard>
@@ -146,11 +128,56 @@ function AppInner() {
 }
 
 export default function App() {
+  const [authenticated, setAuthenticated] = useState(null);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const res = await axios.get('/api/me');
+      if (res.data.authenticated) {
+        setAuthenticated(true);
+        setUser(res.data.user);
+      } else {
+        setAuthenticated(false);
+      }
+    } catch (e) {
+      setAuthenticated(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await axios.post('/api/logout');
+      setAuthenticated(false);
+      setUser(null);
+    } catch (e) {}
+  };
+
+  if (authenticated === null) {
+      return (
+          <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0d0e14', color: 'var(--accent-cyan)' }}>
+              ⬡ HackTerm Yükleniyor...
+          </div>
+      );
+  }
+
+  if (!authenticated) {
+      return (
+          <LanguageProvider>
+              <LoginPage onLogin={(u) => { setAuthenticated(true); setUser(u); }} />
+          </LanguageProvider>
+      );
+  }
+
   return (
     <LanguageProvider>
       <SocketProvider>
         <JobProvider>
-          <AppInner />
+          <AppInner onLogout={handleLogout} user={user} />
         </JobProvider>
       </SocketProvider>
     </LanguageProvider>

@@ -36,18 +36,24 @@ cd hackterm
 ```
 
 ### 2. Yapılandırma (.env)
-Kendi özel portunuzu ve VNC (Uzak Masaüstü) erişim dizininizi ayarlayın. Bu .env dosyasındaki ortam değişkenleri sayesinde Burp/Firefox arayüzlerini açarken hangi "slug" (gizli uzantı) ile girileceğini belirleyebilirsiniz.
+Kendi özel portunuzu, yönetici bilgilerinizi ve oturum güvenlik anahtarınızı ayarlayın.
 ```env
-HACKTERM_PORT=3001
-DESKTOP_PATH=/desktop  # Güvenliğiniz için dinamik URL (Örnek: /gizli-masaustu)
+PORT=3001
+ADMIN_USER=admin
+ADMIN_PASS=password  # BURAYI DEĞİŞTİRİN!
+SESSION_SECRET=hackterm-secret-key
+DESKTOP_PATH=/desktop  # Güvenliğiniz için dinamik URL
 ```
+
+> [!WARNING]
+> **ÖNEMLİ GÜVENLİK UYARISI:** Sistemi halka açık bir sunucuya kurmadan önce varsayılan `admin/password` bilgilerini mutlaka değiştirin. Tüm portlar (3001, 6080, 5901) bu şifre ile korunmaktadır.
 
 ### 3. Docker ile Başlat
 Sistem host makineyi kirletmeden tamamen bağımsız izole bir Docker kapsülünde ayağa kalkar.
 ```bash
 docker-compose up --build -d
 ```
-Ek hiçbir kurulum gerektirmeden `http://sunucu-ip-adresiniz:3001` adresine giderek erişim sağlayın.
+Ek hiçbir kurulum gerektirmeden `http://sunucu-ip-adresiniz:3001` adresine giderek erişim sağlayın. Giriş yapmanız istenecektir.
 
 ---
 

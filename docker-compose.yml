@@ -12,11 +12,19 @@ services:
       - "${HACKTERM_PORT:-3001}:3001"
       - "${NOVNC_PORT:-6080}:6080"
     volumes:
-      - ./downloads:/app/downloads
-      - .tools:/app/.tools
-      - .ovpn:/app/.ovpn
+      - downloads_data:/app/downloads
+      - tools_data:/app/.tools
+      - ovpn_data:/app/.ovpn
     environment:
       - NODE_ENV=production
       - DESKTOP_PATH=${DESKTOP_PATH:-/desktop}
       - NOVNC_PORT=${NOVNC_PORT:-6080}
+      - ADMIN_USER=${ADMIN_USER:-admin}
+      - ADMIN_PASS=${ADMIN_PASS:-password}
+      - SESSION_SECRET=${SESSION_SECRET:-hackterm-secret-key}
     restart: unless-stopped
+
+volumes:
+  downloads_data:
+  tools_data:
+  ovpn_data:
