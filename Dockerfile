@@ -102,10 +102,10 @@ DISPLAY=:2 openbox-session &\n\
 # Start taskbar on display 1\n\
 DISPLAY=:1 tint2 &\n\
 # Start VNC/Websockify for DISPLAY :1 (Port 6080)\n\
-x11vnc -display :1 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5901 -bg -xkb -repeat -pointer_mode 1 -noxrecord -noxfixes -noxdamage &\n\
+x11vnc -display :1 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5901 -bg -quiet -pointer_mode 1 -noxrecord -noxfixes -noxdamage &\n\
 /usr/bin/python3 /usr/bin/websockify --web /usr/share/novnc 6080 localhost:5901 &\n\
 # Start VNC/Websockify for DISPLAY :2 (Port 6081)\n\
-x11vnc -display :2 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5902 -bg -xkb -repeat -pointer_mode 1 -noxrecord -noxfixes -noxdamage &\n\
+x11vnc -display :2 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5902 -bg -quiet -pointer_mode 1 -noxrecord -noxfixes -noxdamage &\n\
 /usr/bin/python3 /usr/bin/websockify --web /usr/share/novnc 6081 localhost:5902 &\n\
 node server/index.js' > /app/entrypoint.sh \
     && chmod +x /app/entrypoint.sh

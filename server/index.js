@@ -304,21 +304,24 @@ app.get('/api/desktop/status', (req, res) => {
 });
 
 app.post('/api/desktop/install', (req, res) => {
-  const { type } = req.body;
+  const { type, termId } = req.body;
   let cmd = '';
   if (type === 'xfce') cmd = 'apt-get update && apt-get install -y xfce4 xfce4-goodies';
   else if (type === 'gnome') cmd = 'apt-get update && apt-get install -y gnome-session-flashback gnome-terminal nautilus';
   
   if (!cmd) return res.status(400).json({ error: 'Geçersiz masaüstü ortamı' });
 
-  const proc = spawn('sh', ['-c', cmd]);
-  proc.stdout.on('data', (data) => console.log(`[Install] ${data}`));
-  proc.on('close', (code) => {
-    console.log(`[Install] Finished with code ${code}`);
-    // Optional: Auto-switch DISPLAY session if possible, or tell user to restart
-  });
+  const proc = spawn('sh', ['-c', cmd], { env: { ...process.env, DEBIAN_FRONTEND: 'noninteractive' }});
   
-  res.json({ message: 'Kurulum başlatıldı. Birkaç dakika sürebilir.' });
+  if (termId) {
+    proc.stdout.on('data', (data) => io.emit(`terminal:data:${termId}`, data.toString()));
+    proc.stderr.on('data', (data) => io.emit(`terminal:data:${termId}`, data.toString()));
+    proc.on('close', (code) => {
+      io.emit(`terminal:data:${termId}`, `\n>>> Kurulum tamamlandı (kod: ${code}) <<<\n`);
+    });
+  }
+
+  res.json({ message: 'Kurulum başlatıldı. Terminalden takip edebilirsiniz.' });
 });
 
 // Active terminal sessions & output buffers

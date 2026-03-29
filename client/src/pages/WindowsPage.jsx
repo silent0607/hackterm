@@ -149,14 +149,39 @@ export default function WindowsPage({ onBack }) {
         <input className="form-input" value={ip} onChange={e => { setIp(e.target.value); if (activeJob) updateJob(activeJob.id, { ip: e.target.value }); }}
           placeholder={activeJob?.ip || '10.10.10.10'} style={{ height: 38 }} />
       </div>
-      <div className="cards-grid">
-        {WINDOWS_CARDS.map(card => (
-          <div key={card.id} className="tool-card" onClick={() => setActiveCard(card.id)}>
-            <div className="card-icon-wrap orange" style={{ fontSize: 24 }}>{card.icon}</div>
-            <div className="card-title">{card.label}</div>
-            <div className="card-desc">{card.desc}</div>
-          </div>
-        ))}
+      <div className="notes-grid">
+        {WINDOWS_CARDS.map(card => {
+          const accentColor = card.id === 'smb' ? 'green' : card.id === 'winrm' ? 'orange' : 'purple';
+          return (
+            <div 
+              key={card.id} 
+              className="note-card glass-card" 
+              onClick={() => setActiveCard(card.id)}
+              style={{ borderLeft: `4px solid var(--accent-${accentColor})`, minHeight: 180 }}
+            >
+              <div>
+                <div style={{ 
+                  width: 44, height: 44, 
+                  borderRadius: 12, 
+                  background: `rgba(var(--accent-${accentColor}-rgb), 0.1)`,
+                  color: `var(--accent-${accentColor})`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  marginBottom: 16,
+                  fontSize: 20
+                }}>
+                  {card.icon}
+                </div>
+                <h3 style={{ fontSize: 16, marginBottom: 8, color: 'var(--text-primary)' }}>{card.label}</h3>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                  {card.desc}
+                </p>
+              </div>
+              <div style={{ marginTop: 16, fontSize: 11, fontWeight: 600, color: `var(--accent-${accentColor})`, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                AÇ →
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

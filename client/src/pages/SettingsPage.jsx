@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Settings, Layout, CheckCircle2, Circle, Loader2, PlayCircle, MonitorStop } from 'lucide-react';
 import { SectionTitle, InfoCard } from '../components/InfoCard';
 import { useLanguage } from '../context/LanguageContext';
+import Terminal from '../components/Terminal';
 
 export default function SettingsPage() {
   const { t } = useLanguage();
@@ -9,6 +10,8 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
   const [installingType, setInstallingType] = useState(null);
   const [message, setMessage] = useState('');
+  
+  const termId = 'desktop-install-logs';
 
   const fetchStatus = async () => {
     try {
@@ -33,7 +36,7 @@ export default function SettingsPage() {
       const res = await fetch('/api/desktop/install', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type })
+        body: JSON.stringify({ type, termId }) // Pass termId to see logs
       });
       const data = await res.json();
       setMessage(data.message);
@@ -147,6 +150,11 @@ export default function SettingsPage() {
               </div>
            </InfoCard>
         </div>
+      </div>
+
+      <div style={{ marginTop: 24 }}>
+        <SectionTitle icon={<Settings size={18} />}>Kurulum Logları</SectionTitle>
+        <Terminal id={termId} title="Installation Terminal / Logs" height={260} />
       </div>
     </div>
   );
