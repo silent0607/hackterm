@@ -21,21 +21,24 @@ ENV MOZ_ACCELERATED_CANVAS=0
 
 # Install GUI Stack, Node.js, Python, and Hacking Tools
 RUN apt-get update && apt-get install -y \
+    software-properties-common \
+    && add-apt-repository ppa:mozillateam/ppa -y \
+    && echo 'Package: *\nPin: release o=LP-PPA-mozillateam\nPin-Priority: 1001\n' > /etc/apt/preferences.d/mozilla-firefox \
+    && apt-get update && apt-get install -y --allow-downgrades \
     curl \
     gnupg \
     build-essential \
     python3 \
     python3-pip \
     python3-venv \
-    # Minimal GUI Stack (Openbox instead of Xfce/GNOME)
-    openbox \
+    # Minimal GUI Stack (Fluxbox instead of Openbox)
+    fluxbox \
     xvfb \
     x11vnc \
     novnc \
     websockify \
     x11-utils \
     x11-xserver-utils \
-    tint2 \
     # Tools
     nmap \
     john \
@@ -43,7 +46,6 @@ RUN apt-get update && apt-get install -y \
     netcat-traditional \
     iputils-ping \
     openvpn \
-    firefox \
     firefox \
     dirb \
     && curl -L https://github.com/OJ/gobuster/releases/download/v3.6.0/gobuster_Linux_x86_64.tar.gz -o gobuster.tar.gz \
@@ -105,9 +107,8 @@ x11vnc -storepasswd ${ADMIN_PASS:-password} /root/.vnc/passwd\n\
 # Set backgrounds and start window managers\n\
 DISPLAY=:1 xsetroot -solid "#020617"\n\
 DISPLAY=:2 xsetroot -solid "#0f172a"\n\
-DISPLAY=:1 openbox-session &\n\
-DISPLAY=:2 openbox-session &\n\
-DISPLAY=:1 tint2 &\n\
+DISPLAY=:1 fluxbox &\n\
+DISPLAY=:2 fluxbox &\n\
 \n\
 # Start VNC/Websockify for DISPLAY :1 (Port 6080)\n\
 x11vnc -display :1 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5901 -bg -quiet -pointer_mode 1 -noxrecord -noxfixes -noxdamage -wait 50 -defer 50 &\n\
