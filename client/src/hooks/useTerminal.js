@@ -62,6 +62,26 @@ export function useTerminal(termId, containerRef, options = {}) {
     term.loadAddon(fit);
     term.loadAddon(links);
     term.open(containerRef.current);
+
+    term.attachCustomKeyEventHandler((e) => {
+      if (e.ctrlKey && e.shiftKey && e.type === 'keydown') {
+        if (e.code === 'KeyC') {
+          const selection = term.getSelection();
+          if (selection) {
+            navigator.clipboard.writeText(selection).catch(() => {});
+          }
+          return false;
+        }
+        if (e.code === 'KeyV') {
+          navigator.clipboard.readText().then(text => {
+            socket.emit('terminal:write', { id: termId, data: text });
+          }).catch(() => {});
+          return false;
+        }
+      }
+      return true;
+    });
+
     fit.fit();
 
     termRef.current = term;

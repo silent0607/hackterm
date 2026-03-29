@@ -39,6 +39,8 @@ RUN apt-get update && apt-get install -y \
     websockify \
     x11-utils \
     x11-xserver-utils \
+    lxterminal \
+    autocutsel \
     # Tools
     nmap \
     john \
@@ -53,6 +55,7 @@ RUN apt-get update && apt-get install -y \
     && mv gobuster /usr/bin/gobuster \
     && rm gobuster.tar.gz \
     && apt-get install -y sqlmap \
+    && update-alternatives --set x-terminal-emulator /usr/bin/lxterminal \
     # Pre-cache apt for fast on-demand DE install
     && apt-get clean \
     && apt-get update \
@@ -123,12 +126,18 @@ DISPLAY=:2 xsetroot -solid "#0f172a"\n\
 DISPLAY=:1 fluxbox &\n\
 DISPLAY=:2 fluxbox &\n\
 \n\
+# Start Clipboard Sync\n\
+DISPLAY=:1 autocutsel -fork &\n\
+DISPLAY=:1 autocutsel -selection PRIMARY -fork &\n\
+DISPLAY=:2 autocutsel -fork &\n\
+DISPLAY=:2 autocutsel -selection PRIMARY -fork &\n\
+\n\
 # Start VNC/Websockify for DISPLAY :1 (Port 6080)\n\
-x11vnc -display :1 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5901 -bg -quiet -pointer_mode 1 -noxrecord -noxfixes -noxdamage -wait 50 -defer 50 &\n\
+x11vnc -display :1 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5901 -bg -quiet -pointer_mode 1 -noxrecord -noxfixes -noxdamage -wait 50 -defer 50 -capslock -xkb &\n\
 /usr/bin/python3 /usr/bin/websockify --web /usr/share/novnc 6080 localhost:5901 &\n\
 \n\
 # Start VNC/Websockify for DISPLAY :2 (Port 6081)\n\
-x11vnc -display :2 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5902 -bg -quiet -pointer_mode 1 -noxrecord -noxfixes -noxdamage -wait 50 -defer 50 &\n\
+x11vnc -display :2 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5902 -bg -quiet -pointer_mode 1 -noxrecord -noxfixes -noxdamage -wait 50 -defer 50 -capslock -xkb &\n\
 /usr/bin/python3 /usr/bin/websockify --web /usr/share/novnc 6081 localhost:5902 &\n\
 \n\
 node server/index.js' > /app/entrypoint.sh \
