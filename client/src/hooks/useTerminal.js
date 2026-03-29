@@ -63,6 +63,7 @@ export function useTerminal(termId, containerRef, options = {}) {
     term.loadAddon(links);
     term.open(containerRef.current);
 
+    // Keyboard Shortcuts (Copy/Paste)
     term.attachCustomKeyEventHandler((e) => {
       if (e.ctrlKey && e.shiftKey && e.type === 'keydown') {
         if (e.code === 'KeyC') {
@@ -82,7 +83,13 @@ export function useTerminal(termId, containerRef, options = {}) {
       return true;
     });
 
-    fit.fit();
+    // Initial Fit with a tiny delay to ensure DOM is settled
+    const initialFit = setTimeout(() => {
+      try {
+        fit.fit();
+        term.refresh(0, term.rows - 1);
+      } catch (e) {}
+    }, 100);
 
     termRef.current = term;
     fitRef.current = fit;
@@ -105,13 +112,17 @@ export function useTerminal(termId, containerRef, options = {}) {
       socket.emit('terminal:write', { id: termId, data });
     });
 
-    // Resize
+    // Resize with safety
     const ro = new ResizeObserver(() => {
-      try {
-        fit.fit();
-        const { cols, rows } = term;
-        socket.emit('terminal:resize', { id: termId, cols, rows });
-      } catch {}
+      if (!fitRef.current) return;
+      setTimeout(() => {
+        try {
+          fitRef.current.fit();
+          const { cols, rows } = term;
+          socket.emit('terminal:resize', { id: termId, cols, rows });
+          term.refresh(0, term.rows - 1);
+        } catch {}
+      }, 50);
     });
     if (containerRef.current) ro.observe(containerRef.current);
 
@@ -123,10 +134,10 @@ export function useTerminal(termId, containerRef, options = {}) {
     });
 
     return () => {
+      clearTimeout(initialFit);
       socket.off(`terminal:data:${termId}`, dataHandler);
       socket.off(`terminal:ready:${termId}`, readyHandler);
       socket.off(`terminal:exit:${termId}`, exitHandler);
-      // socket.emit('terminal:close', { id: termId }); // Removed for persistence
       ro.disconnect();
       term.dispose();
       termRef.current = null;

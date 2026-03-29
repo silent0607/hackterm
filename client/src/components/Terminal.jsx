@@ -87,8 +87,10 @@ export default function Terminal({ id, height: initialHeight = 280, title = 'ter
           user-select: none;
         }
         .terminal-inner {
-          padding: 4px 2px;
+          padding: 6px 4px;
           background: transparent;
+          height: 100%;
+          min-height: 100%;
         }
         .terminal-resize-handle {
           height: 12px;
