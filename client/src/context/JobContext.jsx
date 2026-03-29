@@ -4,12 +4,22 @@ const JobCtx = createContext(null);
 
 const STORAGE_KEY = 'htb_jobs';
 const NOTES_KEY = 'htb_notes';
+const PINNED_TOOLS_KEY = 'htb_pinned_tools';
 
 function loadJobs() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
 }
 function saveJobs(jobs) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs));
+}
+
+function loadPinnedTools() {
+  try {
+    const saved = localStorage.getItem(PINNED_TOOLS_KEY);
+    return saved ? JSON.parse(saved) : ['terminal', 'nmap', 'ftp', 'burp', 'openvpn'];
+  } catch {
+    return ['terminal', 'nmap', 'ftp', 'burp', 'openvpn'];
+  }
 }
 
 export function JobProvider({ children }) {
@@ -19,8 +29,17 @@ export function JobProvider({ children }) {
     return j.length > 0 ? j[0].id : null;
   });
   const [notes, setNotes] = useState(() => localStorage.getItem(NOTES_KEY) || '');
+  const [pinnedTools, setPinnedTools] = useState(() => loadPinnedTools());
 
   const activeJob = jobs.find(j => j.id === activeJobId) || null;
+
+  const togglePinTool = useCallback((toolId) => {
+    setPinnedTools(prev => {
+      const next = prev.includes(toolId) ? prev.filter(id => id !== toolId) : [...prev, toolId];
+      localStorage.setItem(PINNED_TOOLS_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
 
   const addJob = useCallback((name = 'Yeni İş', ip = '') => {
     const job = { id: Date.now().toString(), name, ip, createdAt: new Date().toISOString() };
@@ -56,7 +75,7 @@ export function JobProvider({ children }) {
   }, []);
 
   return (
-    <JobCtx.Provider value={{ jobs, activeJob, activeJobId, setActiveJobId, addJob, updateJob, deleteJob, notes, saveNotes }}>
+    <JobCtx.Provider value={{ jobs, activeJob, activeJobId, setActiveJobId, addJob, updateJob, deleteJob, notes, saveNotes, pinnedTools, togglePinTool }}>
       {children}
     </JobCtx.Provider>
   );

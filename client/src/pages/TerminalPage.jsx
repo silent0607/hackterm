@@ -5,40 +5,89 @@ import { useTerminal } from '../hooks/useTerminal';
 import { useLanguage } from '../context/LanguageContext';
 import { useJobs } from '../context/JobContext';
 
+import { Monitor, GripHorizontal } from 'lucide-react';
+
 function SingleTerm({ id, title, onClose, pinned, onTogglePin }) {
   const containerRef = useRef(null);
+  const [innerHeight, setInnerHeight] = useState(260);
+  const [isResizing, setIsResizing] = useState(false);
   const { isReady } = useTerminal(id, containerRef);
   const { t } = useLanguage();
 
+  const startResizing = useCallback((e) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  const resize = useCallback((e) => {
+    if (isResizing) {
+      const newHeight = e.clientY - containerRef.current.getBoundingClientRect().top;
+      if (newHeight > 100 && newHeight < 1200) {
+        setInnerHeight(newHeight);
+      }
+    }
+  }, [isResizing]);
+
+  useEffect(() => {
+    if (isResizing) {
+      window.addEventListener('mousemove', resize);
+      window.addEventListener('mouseup', stopResizing);
+    } else {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    }
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  }, [isResizing, resize, stopResizing]);
+
   return (
-    <div className="terminal-window" style={{ minHeight: 280 }}>
+    <div className={`terminal-window ${isResizing ? 'resizing' : ''}`} style={{ marginBottom: 20 }}>
       <div className="terminal-titlebar">
         <div className="terminal-dots">
-          <div className="terminal-dot red" />
-          <div className="terminal-dot yellow" />
-          <div className="terminal-dot green" />
+          <div className="terminal-dot red" /><div className="terminal-dot yellow" /><div className="terminal-dot green" />
         </div>
         <div className="terminal-title">
+          <Monitor size={14} style={{ marginRight: 6 }} />
           {isReady
             ? <span style={{ color: 'var(--accent-green)' }}>● {title}</span>
             : <span style={{ color: 'var(--text-muted)' }}>○ {t('connecting')}</span>}
         </div>
-        <div style={{ display: 'flex', gap: 4, marginLeft: 'auto' }}>
+        <div style={{ display: 'flex', gap: 4, marginLeft: 'auto', marginRight: 8 }}>
           <button
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: pinned ? 'var(--accent-green)' : 'var(--text-muted)', padding: 2 }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: pinned ? 'var(--accent-green)' : 'var(--text-muted)', padding: 4 }}
             onClick={onTogglePin} title={pinned ? t('unpin') : t('pin')}>
-            {pinned ? <Pin size={11} /> : <PinOff size={11} />}
+            {pinned ? <Pin size={14} fill="currentColor" /> : <Pin size={14} />}
           </button>
           {!pinned && (
             <button
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2 }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}
               onClick={onClose} title={t('close')}>
-              <X size={11} />
+              <X size={14} />
             </button>
           )}
         </div>
       </div>
-      <div ref={containerRef} style={{ height: 260, padding: '4px 2px' }} />
+      <div ref={containerRef} style={{ height: innerHeight, padding: '4px 2px' }} />
+      <div className="terminal-resize-handle" onMouseDown={startResizing} style={{ 
+        height: 10, background: 'rgba(255,255,255,0.02)', cursor: 'ns-resize', 
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        borderTop: '1px solid var(--border)'
+      }}>
+        <GripHorizontal size={12} color="var(--text-muted)" />
+      </div>
+
+      <style>{`
+        .terminal-window.resizing {
+          border-color: var(--accent-cyan);
+          box-shadow: 0 0 20px rgba(0, 212, 255, 0.1);
+        }
+      `}</style>
     </div>
   );
 }

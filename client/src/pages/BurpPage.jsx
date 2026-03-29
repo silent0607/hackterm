@@ -1,20 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
-import { useSocket } from '../context/SocketContext';
-import { InfoCard, SectionTitle } from '../components/InfoCard';
-import { Monitor, Upload, Play, Package, ExternalLink, ShieldCheck, Terminal as TerminalIcon, Chrome } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
+import Terminal from '../components/Terminal';
 
 export default function BurpPage({ onBack }) {
   const { t } = useLanguage();
   const { socket } = useSocket();
+  const { activeJobId } = useJobs();
   const [burpStatus, setBurpStatus] = useState({ installed: false });
   const [shFiles, setShFiles] = useState([]);
   const [envInfo, setEnvInfo] = useState({ novncPort: '6080', desktopEnv: 'xfce', desktopPath: '/desktop' });
   const [selectedFile, setSelectedFile] = useState('');
   const [installing, setInstalling] = useState(false);
   const [running, setRunning] = useState(false);
-  const [logs, setLogs] = useState([]);
-  const logEndRef = useRef(null);
+
+  const termId = `burp-${activeJobId || 'default'}`;
 
   const fetchStatus = async () => {
     try {
@@ -46,17 +43,29 @@ export default function BurpPage({ onBack }) {
     fetchEnv();
   }, []);
 
-  useEffect(() => {
-    if (!socket) return;
-    const handleLog = (data) => {
-      setLogs(prev => [...prev, data]);
-      setTimeout(() => {
-        logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 50);
-    };
-    socket.on('package:log', handleLog);
-    return () => socket.off('package:log', handleLog);
-  }, [socket]);
+  const handleInstall = async () => {
+    if (!selectedFile) return;
+    setInstalling(true);
+    try {
+      await fetch('/api/burp/install', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ file: selectedFile, termId }) // Pass termId for logs
+      });
+      fetchStatus();
+    } catch (e) {} finally { setInstalling(false); }
+  };
+
+  const handleRun = async () => {
+    setRunning(true);
+    try {
+      await fetch('/api/burp/run', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ termId }) // Pass termId for logs
+      });
+    } catch (e) {} finally { setRunning(false); }
+  };
 
   // Main desktop/Burp session (Port 6080)
   const vncUrl = `http://${window.location.hostname}:6080${envInfo.desktopPath}/vnc.html?host=${window.location.hostname}&port=6080&autoconnect=true`;
@@ -75,28 +84,6 @@ export default function BurpPage({ onBack }) {
     } catch (e) { alert(t('error')); }
   };
 
-  const handleInstall = async () => {
-    if (!selectedFile) return;
-    setInstalling(true);
-    setLogs([`>>> Burp Suite kurulumu başlatılıyor: ${selectedFile} <<<\n`]);
-    try {
-      await fetch('/api/burp/install', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ file: selectedFile })
-      });
-      fetchStatus();
-    } catch (e) {} finally { setInstalling(false); }
-  };
-
-  const handleRun = async () => {
-    setRunning(true);
-    setLogs(prev => [...prev, `\n>>> Burp Suite çalıştırılıyor... <<<\n`]);
-    try {
-      await fetch('/api/burp/run', { method: 'POST' });
-    } catch (e) {} finally { setRunning(false); }
-  };
-
   const handleLaunchFirefox = async () => {
     try {
       await fetch('/api/firefox/launch', { method: 'POST' });
@@ -108,6 +95,7 @@ export default function BurpPage({ onBack }) {
 
   return (
     <div style={{ paddingBottom: 40 }}>
+      {/* ... previous headers ... */}
       <div className="page-header">
         <div>
           <div className="page-header-back" onClick={onBack}>{t('back_to_menu')}</div>
@@ -116,16 +104,16 @@ export default function BurpPage({ onBack }) {
         </div>
       </div>
 
-      <div className="grid-2">
+      <div className="grid-2" style={{ marginBottom: 24 }}>
         <div>
           <SectionTitle icon={<Package size={16} />}>{t('install_run')}</SectionTitle>
-          <div className="info-panel" style={{ padding: 20 }}>
+          <div className="info-panel" style={{ padding: 20, height: '100%' }}>
             {burpStatus.installed ? (
               <div style={{ textAlign: 'center' }}>
                 <div style={{ color: 'var(--accent-green)', fontWeight: 'bold', marginBottom: 16 }}>
                   ✅ {t('burp_installed')}
                 </div>
-                <button className="btn btn-green" onClick={handleRun} disabled={running} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <button className="btn-pro btn-green" onClick={handleRun} disabled={running} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                   <Play size={16} /> {running ? t('burp_running') : t('burp_run')}
                 </button>
               </div>
@@ -138,13 +126,15 @@ export default function BurpPage({ onBack }) {
                   <option value="">{t('burp_select_sh')}</option>
                   {shFiles.map(f => <option key={f} value={f}>{f}</option>)}
                 </select>
-                <button className="btn btn-cyan" onClick={handleInstall} disabled={installing || !selectedFile} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                  <Package size={16} /> {installing ? t('burp_installing') : t('burp_install_btn')}
-                </button>
-                <label className="btn btn-ghost" style={{ width: '100%', marginTop: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                  <Upload size={16} /> {t('burp_upload')}
-                  <input type="file" accept=".sh" style={{ display: 'none' }} onChange={handleUpload} />
-                </label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button className="btn-pro btn-cyan" onClick={handleInstall} disabled={installing || !selectedFile} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    <Package size={16} /> {installing ? t('burp_installing') : t('burp_install_btn')}
+                  </button>
+                  <label className="btn-pro btn-outline" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 12px' }}>
+                    <Upload size={16} />
+                    <input type="file" accept=".sh" style={{ display: 'none' }} onChange={handleUpload} />
+                  </label>
+                </div>
               </div>
             )}
           </div>
@@ -153,64 +143,30 @@ export default function BurpPage({ onBack }) {
         <div>
           <SectionTitle icon={<Monitor size={16} />}>{t('gui_desktop')}</SectionTitle>
           <div className="info-panel" style={{ padding: 20 }}>
-            <div style={{ textAlign: 'center', marginBottom: 16 }}>
-              {t('desktop_access_desc')}
-            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <button onClick={() => window.open(vncUrl, '_blank')} className="btn btn-cyan" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                  <Monitor size={16} /> {t('desktop_open')} (Burp Session)
+                <button onClick={() => window.open(vncUrl, '_blank')} className="btn-pro btn-cyan" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <Monitor size={16} /> {t('desktop_open')} (VNC Port 6080)
                 </button>
-                <button onClick={handleLaunchFirefox} className="btn btn-purple" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                  <Chrome size={16} /> Firefox'u Aç (Port 6081)
+                <button onClick={handleLaunchFirefox} className="btn-pro btn-purple" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <Chrome size={16} /> Firefox'u Aç (VNC Port 6081)
                 </button>
             </div>
             
-            <div style={{ marginTop: 24 }}>
-              <SectionTitle icon={<ShieldCheck size={14} />}>{t('burp_ca_title')}</SectionTitle>
-              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
-                <p style={{ fontSize: 12, marginBottom: 8 }}>{t('burp_ca_desc')}</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                   <button onClick={handleLaunchFirefox} className="btn btn-xs btn-ghost" style={{ width: '100%' }}>
-                     {t('firefox_open')}
-                   </button>
-                   <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                     {t('go_to_burp')}
-                   </div>
-                   <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                     {t('import_cert')}
-                   </div>
-                </div>
-              </div>
+            <div style={{ marginTop: 24, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+               <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>{t('burp_ca_title')}</div>
+               <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('burp_ca_desc')}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div style={{ marginTop: 24 }}>
-        <SectionTitle icon={<TerminalIcon size={16} />}>Burp Suite Konsolu</SectionTitle>
-        <div className="terminal-pro" style={{ height: 300 }}>
-          <div className="terminal-pro-header">
-            <div className="terminal-dot red" />
-            <div className="terminal-dot yellow" />
-            <div className="terminal-dot green" />
-            <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono', marginLeft: 12 }}>burp_logs.log</span>
-          </div>
-          <div style={{
-            flex: 1,
-            background: 'transparent',
-            padding: 16, overflowY: 'auto', fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: '#4ade80', whiteSpace: 'pre-wrap', wordWrap: 'break-word'
-          }}>
-            {logs.length ? logs.join('') : '> Bekleniyor...'}
-            <div ref={logEndRef} />
-          </div>
-        </div>
-      </div>
+      <Terminal id={termId} title="Burp Suite Konsolu / Logs" height={280} />
 
       <div style={{ marginTop: 24 }}>
         <InfoCard title={t('usage_guide')} icon="💡" color="cyan">
-          <div className="cmd-desc">
-            <b>1. Firefox & Burp</b>: {t('guide_1')}<br/><br/>
-            <b>2. {t('burp_ca_title')}</b>: {t('guide_2')}<br/><br/>
+          <div className="cmd-desc" style={{ fontSize: 13, lineHeight: 1.6 }}>
+            <b>1. Firefox & Burp</b>: {t('guide_1')}<br/>
+            <b>2. {t('burp_ca_title')}</b>: {t('guide_2')}<br/>
             <b>3. {t('gui_desktop')}</b>: {t('guide_3')}
           </div>
         </InfoCard>

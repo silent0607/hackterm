@@ -1,41 +1,37 @@
-import { useState } from 'react';
-import { 
-  Plus, 
-  Trash2, 
-  Terminal, 
-  FileText, 
-  Search, 
-  FolderTree, 
-  Database, 
-  Shield, 
-  Cpu, 
-  ChevronRight, 
-  Network, 
-  Settings,
-  Package,
-  Languages,
-  Home,
-  Code,
-  Database as DbIcon,
-} from 'lucide-react';
+import { LayoutGrid, Monitor, FolderTree, Package, FileText, Settings, Languages, Home, Plus, Trash2, Pin } from 'lucide-react';
 import { useJobs } from '../context/JobContext';
 import { useLanguage } from '../context/LanguageContext';
 
-const NAV_ITEMS = [
+const CORE_NAV = [
   { id: 'home',       label: 'home',       icon: <Home size={18} /> },
-  { id: 'terminal',   label: 'terminal',        icon: <Terminal size={18} /> },
-  { id: 'ftp',        label: 'ftp',             icon: <FolderTree size={18} /> },
-  { id: 'nmap',       label: 'nmap',            icon: <Search size={18} /> },
-  { id: 'redis',      label: 'redis',           icon: <DbIcon size={18} /> },
-  { id: 'openvpn',    label: 'openvpn',         icon: <Shield size={18} /> },
-  { id: 'burp',       label: 'burp',      icon: <Cpu size={18} /> },
-  { id: 'packages',   label: 'packages',  icon: <Package size={18} /> },
-  { id: 'notes',      label: 'notes',     icon: <FileText size={18} /> },
-  { id: 'settings',   label: 'settings',         icon: <Settings size={18} /> },
+  { id: 'terminal',   label: 'terminal',   icon: <Monitor size={18} /> },
+  { id: 'ftp',        label: 'ftp',        icon: <FolderTree size={18} /> },
+];
+
+const OTHER_NAV = [
+  { id: 'packages',   label: 'packages',   icon: <Package size={18} /> },
+  { id: 'notes',      label: 'notes',      icon: <FileText size={18} /> },
+  { id: 'settings',   label: 'settings',   icon: <Settings size={18} /> },
+];
+
+// This list defines all potential tools that can be pinned
+const ALL_TOOLS = [
+  { id: 'nmap',       label: 'tool_nmap',    icon: <Pin size={14} /> },
+  { id: 'gobuster',   label: 'tool_gobuster',icon: <Pin size={14} /> },
+  { id: 'burp',       label: 'tool_burp',    icon: <Pin size={14} /> },
+  { id: 'sql',        label: 'tool_sql',     icon: <Pin size={14} /> },
+  { id: 'phpshell',   label: 'tool_phpshell',icon: <Pin size={14} /> },
+  { id: 'network',    label: 'tool_network', icon: <Pin size={14} /> },
+  { id: 'redis',      label: 'tool_redis',   icon: <Pin size={14} /> },
+  { id: 'john',       label: 'tool_john',    icon: <Pin size={14} /> },
+  { id: 'windows',    label: 'tool_windows', icon: <Pin size={14} /> },
+  { id: 'openvpn',    label: 'tool_openvpn', icon: <Pin size={14} /> },
+  { id: 'aws',        label: 'tool_aws',     icon: <Pin size={14} /> },
+  { id: 'grep',       label: 'tool_grep',    icon: <Pin size={14} /> },
 ];
 
 export default function Sidebar({ currentPage, onNavigate }) {
-  const { jobs, activeJob, activeJobId, setActiveJobId, addJob, updateJob, deleteJob, notes, saveNotes } = useJobs();
+  const { jobs, activeJobId, deleteJob, addJob, pinnedTools } = useJobs();
   const { language, setLanguage, t } = useLanguage();
   const [editingJobId, setEditingJobId] = useState(null);
   const [newJobModal, setNewJobModal] = useState(false);
@@ -82,8 +78,32 @@ export default function Sidebar({ currentPage, onNavigate }) {
 
       {/* Navigation */}
       <nav className="sidebar-nav">
-        <div className="sidebar-section-label">{t('tools')}</div>
-        {NAV_ITEMS.map(item => (
+        <div className="sidebar-section-label">{t('main_menu')}</div>
+        {CORE_NAV.map(item => (
+          <div key={item.id}
+            className={`sidebar-item ${currentPage === item.id ? 'active' : ''}`}
+            onClick={() => onNavigate(item.id)}>
+            <span className="sidebar-item-icon">{item.icon}</span>
+            <span>{t(item.label)}</span>
+          </div>
+        ))}
+
+        {pinnedTools.length > 0 && (
+          <>
+            <div className="sidebar-section-label" style={{ marginTop: 20 }}>{t('pinned_tools')}</div>
+            {ALL_TOOLS.filter(t => pinnedTools.includes(t.id)).map(item => (
+              <div key={item.id}
+                className={`sidebar-item ${currentPage === item.id ? 'active' : ''}`}
+                onClick={() => onNavigate(item.id)}>
+                <span className="sidebar-item-icon">{item.icon}</span>
+                <span>{t(item.label)}</span>
+              </div>
+            ))}
+          </>
+        )}
+
+        <div className="sidebar-section-label" style={{ marginTop: 20 }}>{t('other')}</div>
+        {OTHER_NAV.map(item => (
           <div key={item.id}
             className={`sidebar-item ${currentPage === item.id ? 'active' : ''}`}
             onClick={() => onNavigate(item.id)}>

@@ -9,6 +9,11 @@ export const translations = {
     burp: 'Burp Suite',
     settings: 'Sistem Ayarları',
     back_to_menu: '← Ana Menü',
+    main_menu: 'ANA MENÜ',
+    pinned_tools: 'SABİTLENENLER',
+    other: 'DİĞER',
+    pin_to_sidebar: 'Kenar çubuğuna sabitle',
+    unpin_from_sidebar: 'Sabiti kaldır',
 
     // HomePage
     welcome: 'HackTerm Güvenlik Arayüzü',
@@ -158,10 +163,12 @@ export const translations = {
     tool_network: 'Ağ Güvenliği',
     tool_sql: 'SQL Araçları',
     tool_gobuster: 'Gobuster',
-    tool_john: 'John the Ripper',
+    tool_john: 'John & Hashcat',
+    tool_windows: 'Windows Araçları',
     tool_aws: 'AWS Güvenlik',
     tool_grep: 'Grep Araçları',
     tool_settings: 'Sistem Ayarları',
+    c_windows: 'SMBclient, Evil-WinRM ve MSSQL araçları ile Windows hedeflere saldırın.',
 
     quick_scan: 'Hızlı Port Tara',
     get_version_info: 'Versiyon Bilgisi Al',
@@ -277,6 +284,11 @@ export const translations = {
     burp: 'Burp Suite',
     settings: 'System Settings',
     back_to_menu: '← Main Menu',
+    main_menu: 'MAIN MENU',
+    pinned_tools: 'PINNED TOOLS',
+    other: 'OTHER',
+    pin_to_sidebar: 'Pin to sidebar',
+    unpin_from_sidebar: 'Unpin from sidebar',
 
     // HomePage
     welcome: 'HackTerm Security UI',
@@ -413,10 +425,12 @@ export const translations = {
     tool_network: 'Network Security',
     tool_sql: 'SQL Tools',
     tool_gobuster: 'Gobuster',
-    tool_john: 'John the Ripper',
+    tool_john: 'John & Hashcat',
+    tool_windows: 'Windows Tools',
     tool_aws: 'AWS Security',
     tool_grep: 'Grep Tools',
     tool_settings: 'System Settings',
+    c_windows: 'Attack Windows targets using SMBclient, Evil-WinRM, and MSSQL tools.',
 
     quick_scan: 'Quick Port Scan',
     get_version_info: 'Get Version Info',
