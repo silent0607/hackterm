@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react';
 import { useJobs } from '../context/JobContext';
 import { useLanguage } from '../context/LanguageContext';
 import { 
@@ -17,7 +18,9 @@ import {
   Settings,
   Monitor,
   Pin,
-  PinOff
+  PinOff,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 const TOOLS = [
@@ -40,6 +43,18 @@ const TOOLS = [
 export default function HomePage({ onNavigate }) {
   const { t } = useLanguage();
   const { pinnedTools, togglePinTool } = useJobs();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showAll, setShowAll] = useState(false);
+
+  const filteredTools = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    return TOOLS.filter(tool => 
+      t(tool.label).toLowerCase().includes(q) || 
+      t(tool.desc).toLowerCase().includes(q)
+    );
+  }, [searchQuery, t]);
+
+  const displayedTools = searchQuery ? filteredTools : (showAll ? filteredTools : filteredTools.slice(0, 8));
 
   return (
     <div style={{ paddingBottom: 40 }}>
@@ -50,8 +65,43 @@ export default function HomePage({ onNavigate }) {
         </div>
       </div>
 
+      <div style={{ 
+        marginBottom: 32, 
+        maxWidth: 600, 
+        margin: '0 auto 40px auto',
+        position: 'relative'
+      }}>
+        <div style={{
+          position: 'absolute',
+          left: 16,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          color: 'var(--text-muted)'
+        }}>
+          <Search size={20} />
+        </div>
+        <input 
+          type="text" 
+          placeholder={t('search_tools') || 'Araçlarda ara...'} 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="glass-input"
+          style={{
+            width: '100%',
+            padding: '16px 16px 16px 48px',
+            fontSize: 16,
+            borderRadius: 16,
+            background: 'var(--panel-bg)',
+            border: '1px solid var(--border)',
+            color: 'var(--text-primary)',
+            outline: 'none',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.2)'
+          }}
+        />
+      </div>
+
       <div className="notes-grid">
-        {TOOLS.map((tool) => {
+        {displayedTools.map((tool) => {
           const isPinned = pinnedTools.includes(tool.id);
           return (
             <div 
@@ -102,6 +152,36 @@ export default function HomePage({ onNavigate }) {
           );
         })}
       </div>
+
+      {!searchQuery && filteredTools.length > 8 && (
+        <div style={{ textAlign: 'center', marginTop: 32 }}>
+          <button 
+            onClick={() => setShowAll(!showAll)}
+            className="btn btn-cyan"
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: 8,
+              padding: '12px 24px',
+              borderRadius: 12,
+              fontWeight: 600
+            }}
+          >
+            {showAll ? (
+              <> {t('show_less') || 'Daha Az Göster'} <ChevronUp size={18} /> </>
+            ) : (
+              <> {t('show_all') || 'Hepsini Gör'} <ChevronDown size={18} /> </>
+            )}
+          </button>
+        </div>
+      )}
+
+      {displayedTools.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
+          <Search size={48} style={{ opacity: 0.2, marginBottom: 16 }} />
+          <p>{t('no_tools_found') || 'Aradığınız kriterlere uygun araç bulunamadı.'}</p>
+        </div>
+      )}
     </div>
   );
 }

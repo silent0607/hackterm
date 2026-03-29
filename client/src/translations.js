@@ -14,6 +14,16 @@ export const translations = {
     other: 'DİĞER',
     pin_to_sidebar: 'Kenar çubuğuna sabitle',
     unpin_from_sidebar: 'Sabiti kaldır',
+    shortcuts: 'Kısayollar',
+    shortcuts_title: 'Klavye Kısayolları',
+    shortcuts_desc: 'Araçlar arası hızlı geçiş için özel tuş atamaları tanımlayın.',
+    tool_shortcuts: 'Araç Kısayolları',
+    save: 'Kaydet',
+    shortcut_tips_title: 'İpuçları',
+    show_all: 'Hepsini Gör',
+    show_less: 'Daha Az Göster',
+    search_tools: 'Araçlarda ara...',
+    no_tools_found: 'Aradığınız kriterlere uygun araç bulunamadı.',
 
     // HomePage
     welcome: 'HackTerm Güvenlik Arayüzü',
@@ -289,6 +299,16 @@ export const translations = {
     other: 'OTHER',
     pin_to_sidebar: 'Pin to sidebar',
     unpin_from_sidebar: 'Unpin from sidebar',
+    shortcuts: 'Shortcuts',
+    shortcuts_title: 'Keyboard Shortcuts',
+    shortcuts_desc: 'Define custom key bindings for fast tool switching.',
+    tool_shortcuts: 'Tool Shortcuts',
+    save: 'Save',
+    shortcut_tips_title: 'Tips',
+    show_all: 'Show All',
+    show_less: 'Show Less',
+    search_tools: 'Search tools...',
+    no_tools_found: 'No tools found matching your search.',
 
     // HomePage
     welcome: 'HackTerm Security UI',

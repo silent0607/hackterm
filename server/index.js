@@ -23,6 +23,7 @@ const io = new Server(server, {
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'password';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'hackterm-secret-key';
+const SHORTCUTS_FILE = path.join(process.env.TOOLS_DIR || '/app/.tools', 'shortcuts.json');
 
 const sessionMiddleware = session({
   secret: SESSION_SECRET,
@@ -376,6 +377,29 @@ app.post('/api/market/install', (req, res) => {
   }
 
   res.json({ message: 'Kurulum başlatıldı. Terminalden takip edebilirsiniz.' });
+});
+
+// Shortcut Management
+app.get('/api/shortcuts', (req, res) => {
+  if (fs.existsSync(SHORTCUTS_FILE)) {
+    try {
+      const data = fs.readFileSync(SHORTCUTS_FILE, 'utf8');
+      return res.json(JSON.parse(data));
+    } catch (e) {
+      return res.json({});
+    }
+  }
+  res.json({});
+});
+
+app.post('/api/shortcuts', (req, res) => {
+  const shortcuts = req.body;
+  try {
+    fs.writeFileSync(SHORTCUTS_FILE, JSON.stringify(shortcuts, null, 2));
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: 'Kaydedilirken hata oluştu' });
+  }
 });
 
 // Active terminal sessions & output buffers

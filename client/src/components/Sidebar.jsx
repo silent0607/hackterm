@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutGrid, Monitor, FolderTree, Package, FileText, Settings, Languages, Home, Plus, Trash2, Pin } from 'lucide-react';
+import { LayoutGrid, Monitor, FolderTree, Package, FileText, Settings, Languages, Home, Plus, Trash2, Pin, Keyboard } from 'lucide-react';
 import { useJobs } from '../context/JobContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -11,6 +11,7 @@ const CORE_NAV = [
 
 const OTHER_NAV = [
   { id: 'packages',   label: 'packages',   icon: <Package size={18} /> },
+  { id: 'shortcuts',  label: 'shortcuts',  icon: <Keyboard size={18} /> },
   { id: 'notes',      label: 'notes',      icon: <FileText size={18} /> },
   { id: 'settings',   label: 'settings',   icon: <Settings size={18} /> },
 ];

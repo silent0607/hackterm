@@ -26,6 +26,8 @@ import GrepPage from './pages/GrepPage';
 import SettingsPage from './pages/SettingsPage';
 import PackagesPage from './pages/PackagesPage';
 import NotesPage from './pages/NotesPage';
+import ShortcutsPage from './pages/ShortcutsPage';
+import { useGlobalShortcuts } from './hooks/useGlobalShortcuts';
 
 function JobGuard({ children }) {
   const { activeJob } = useJobs();
@@ -71,6 +73,7 @@ function AppInner({ onLogout, user }) {
   const [rightOpen, setRightOpen] = useState(false);
 
   const navigate = (p) => setPage(p);
+  const { refreshShortcuts } = useGlobalShortcuts(navigate);
   const goBack = () => setPage('home');
 
   return (
@@ -100,6 +103,9 @@ function AppInner({ onLogout, user }) {
             </div>
             <div style={{ display: page === 'settings' ? 'block' : 'none', height: '100%' }}>
               <SettingsPage onNavigate={navigate} onBack={goBack} />
+            </div>
+            <div style={{ display: page === 'shortcuts' ? 'block' : 'none', height: '100%' }}>
+              <ShortcutsPage onRefresh={refreshShortcuts} onNavigate={navigate} onBack={goBack} />
             </div>
             
             {['sql', 'phpshell', 'network', 'john', 'aws', 'openvpn', 'burp', 'grep', 'redis', 'windows', 'gobuster'].map(p => (
