@@ -41,12 +41,18 @@ Edit the `.env` file to set your preferred port, administrator credentials, and 
 PORT=3001
 ADMIN_USER=admin
 ADMIN_PASS=password  # CHANGE THIS!
-SESSION_SECRET=your-secret-key-here
+SESSION_SECRET=54njn54jkn54j5n54jnt45kn_secure_v5_prod
 DESKTOP_PATH=/desktop  # Your dynamic noVNC URL slug for security
 ```
 
 > [!WARNING]
-> **IMPORTANT SECURITY:** Change the default `admin/password` credentials before deploying to any public server. All ports (3001, 6080, 5901) are protected by this password.
+> **IMPORTANT SECURITY:** Change the default `admin/password` credentials before deploying to any public server. All ports (3001, 6080-6082) are protected by this password.
+> 
+> **FIREWALL NOTE:** If deploying on a Cloud Server (VPS), you must open the following ports in your firewall:
+> *   `3001` (Web UI)
+> *   `6080` (Desktop GUI)
+> *   `6081` (Firefox GUI)
+> *   `6082` (Wireshark GUI)
 
 ### 3. Start with Docker
 The entire system functions within an isolated Docker container with zero dependency bloat on your host system.

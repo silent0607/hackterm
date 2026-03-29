@@ -46,7 +46,13 @@ DESKTOP_PATH=/desktop  # Güvenliğiniz için dinamik URL
 ```
 
 > [!WARNING]
-> **ÖNEMLİ GÜVENLİK UYARISI:** Sistemi halka açık bir sunucuya kurmadan önce varsayılan `admin/password` bilgilerini mutlaka değiştirin. Tüm portlar (3001, 6080, 5901) bu şifre ile korunmaktadır.
+> **ÖNEMLİ GÜVENLİK UYARISI:** Sistemi halka açık bir sunucuya kurmadan önce varsayılan `admin/password` bilgilerini mutlaka değiştirin. Tüm portlar (3001, 6080-6082) bu şifre ile korunmaktadır.
+> 
+> **GÜVENLİK DUVARI (FIREWALL) NOTU:** Eğer bir Bulut Sunucu (VPS) üzerine kurulum yapıyorsanız, firewall üzerinden şu portları dışarıya açmanız (Allow) gerekir:
+> *   `3001` (Web Arayüzü)
+> *   `6080` (Masaüstü Görüntüsü)
+> *   `6081` (Firefox Görüntüsü)
+> *   `6082` (Wireshark Görüntüsü)
 
 ### 3. Docker ile Başlat
 Sistem host makineyi kirletmeden tamamen bağımsız izole bir Docker kapsülünde ayağa kalkar.
