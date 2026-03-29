@@ -347,7 +347,7 @@ const toolsConfig = {
   john: { check: () => { try { execSync('which john'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y john' },
   hashcat: { check: () => { try { execSync('which hashcat'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y hashcat' },
   awscli: { check: () => { try { execSync('which aws'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y awscli' },
-  impacket: { check: () => fs.existsSync('/app/.venv/bin/impacket-psexec'), cmd: '/app/.venv/bin/pip install impacket' },
+  impacket: { check: () => { try { execSync('/app/.venv/bin/python3 -c "import impacket"'); return true; } catch{ return false; } }, cmd: '/app/.venv/bin/pip install impacket' },
   evilwinrm: { check: () => { try { execSync('which evil-winrm'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y ruby ruby-dev && gem install evil-winrm' },
   smbclient: { check: () => { try { execSync('which smbclient'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y smbclient' },
   responder: { check: () => fs.existsSync('/app/.tools/Responder/Responder.py'), cmd: 'git clone https://github.com/lgandx/Responder.git /app/.tools/Responder || (cd /app/.tools/Responder && git pull)' },
@@ -355,7 +355,8 @@ const toolsConfig = {
   nmap: { check: () => { try { execSync('which nmap'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y nmap' },
   gobuster: { check: () => { try { execSync('which gobuster'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y gobuster' },
   firefox: { check: () => { try { execSync('which firefox'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y firefox' },
-  redis: { check: () => { try { execSync('which redis-cli'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y redis-tools' }
+  redis: { check: () => { try { execSync('which redis-cli'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y redis-tools' },
+  ftp: { check: () => { try { execSync('which ftp'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y ftp' }
 };
 
 app.get('/api/market/status', (req, res) => {
@@ -378,6 +379,7 @@ app.post('/api/market/install', (req, res) => {
     proc.stderr.on('data', (data) => io.emit(`terminal:data:${termId}`, data.toString()));
     proc.on('close', (code) => {
       io.emit(`terminal:data:${termId}`, `\n>>> [${tool}] Kurulumu tamamlandı (kod: ${code}) <<<\n`);
+      io.emit('market:final', { tool, code });
     });
   }
 

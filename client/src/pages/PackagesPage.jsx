@@ -54,14 +54,22 @@ export default function PackagesPage() {
         logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 50);
     };
+
+    const handleFinal = () => {
+      setIsRunning(false);
+      setInstallingTool(null);
+      fetchStatus();
+    };
     
     if (socket) {
       socket.on(`terminal:data:${termId}`, handleLog);
+      socket.on('market:final', handleFinal);
     }
 
     return () => {
       if (socket) {
         socket.off(`terminal:data:${termId}`, handleLog);
+        socket.off('market:final', handleFinal);
       }
     };
   }, [socket, t, termId]);
