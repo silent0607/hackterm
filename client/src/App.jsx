@@ -119,21 +119,24 @@ function AppInner() {
               <SettingsPage onNavigate={navigate} onBack={goBack} />
             </div>
             
-            {/* Minor tool pages (rendered conditionally as they are less state-heavy, but we could persist them too if needed) */}
-            {['sql', 'phpshell', 'network', 'john', 'aws', 'openvpn', 'burp', 'grep', 'redis', 'windows'].includes(page) && (
-              <JobGuard>
-                {page === 'sql' && <SqlPage onNavigate={navigate} onBack={goBack} />}
-                {page === 'phpshell' && <PhpShellPage onNavigate={navigate} onBack={goBack} />}
-                {page === 'network' && <NetworkPage onNavigate={navigate} onBack={goBack} />}
-                {page === 'john' && <JohnPage onNavigate={navigate} onBack={goBack} />}
-                {page === 'aws' && <AwsPage onNavigate={navigate} onBack={goBack} />}
-                {page === 'openvpn' && <OpenVpnPage onNavigate={navigate} onBack={goBack} />}
-                {page === 'burp' && <BurpPage onNavigate={navigate} onBack={goBack} />}
-                {page === 'grep' && <GrepPage onNavigate={navigate} onBack={goBack} />}
-                {page === 'redis' && <RedisPage onNavigate={navigate} onBack={goBack} />}
-                {page === 'windows' && <WindowsPage onNavigate={navigate} onBack={goBack} />}
-              </JobGuard>
-            )}
+            {/* All tool pages — persisted via display:none so terminals survive navigation */}
+            {['sql', 'phpshell', 'network', 'john', 'aws', 'openvpn', 'burp', 'grep', 'redis', 'windows', 'gobuster'].map(p => (
+              <div key={p} style={{ display: page === p ? 'block' : 'none', height: '100%' }}>
+                <JobGuard>
+                  {p === 'sql' && <SqlPage onNavigate={navigate} onBack={goBack} />}
+                  {p === 'phpshell' && <PhpShellPage onNavigate={navigate} onBack={goBack} />}
+                  {p === 'network' && <NetworkPage onNavigate={navigate} onBack={goBack} />}
+                  {p === 'john' && <JohnPage onNavigate={navigate} onBack={goBack} />}
+                  {p === 'aws' && <AwsPage onNavigate={navigate} onBack={goBack} />}
+                  {p === 'openvpn' && <OpenVpnPage onNavigate={navigate} onBack={goBack} />}
+                  {p === 'burp' && <BurpPage onNavigate={navigate} onBack={goBack} />}
+                  {p === 'grep' && <GrepPage onNavigate={navigate} onBack={goBack} />}
+                  {p === 'redis' && <RedisPage onNavigate={navigate} onBack={goBack} />}
+                  {p === 'windows' && <WindowsPage onNavigate={navigate} onBack={goBack} />}
+                  {p === 'gobuster' && <GobusterPage onNavigate={navigate} onBack={goBack} />}
+                </JobGuard>
+              </div>
+            ))}
           </div>
           <RightPanel open={rightOpen} onClose={() => setRightOpen(false)} />
         </main>
