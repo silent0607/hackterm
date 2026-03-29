@@ -33,7 +33,8 @@ RUN apt-get update && apt-get install -y \
     x11vnc \
     novnc \
     websockify \
-    tint2 \
+    x11-utils \
+    x11-xserver-utils \
     # Tools
     nmap \
     john \
@@ -78,35 +79,42 @@ RUN python3 -m venv /app/.venv \
 RUN echo '#!/bin/bash\n\
 rm -f /tmp/.X1-lock /tmp/.X2-lock\n\
 dbus-daemon --system --fork\n\
-# Start Display :1 (Main / Burp)\n\
+# Start Displays\n\
 Xvfb :1 -screen 0 1920x1080x24 &\n\
-# Start Display :2 (Firefox)\n\
 Xvfb :2 -screen 0 1920x1080x24 &\n\
-sleep 2\n\
+\n\
+# Function to wait for display\n\
+wait_for_display() {\n\
+  local disp=$1\n\
+  for i in {1..30}; do\n\
+    if xdpyinfo -display ":$disp" >/dev/null 2>&1; then return 0; fi\n\
+    echo "Waiting for display :$disp..."\n\
+    sleep 0.5\n\
+  done\n\
+  return 1\n\
+}\n\
+\n\
+wait_for_display 1\n\
+wait_for_display 2\n\
+\n\
 # Handle VNC Password\n\
 mkdir -p /root/.vnc\n\
 x11vnc -storepasswd ${ADMIN_PASS:-password} /root/.vnc/passwd\n\
-# Handle custom desktop path slug for BOTH displays\n\
-SLUG=${DESKTOP_PATH:-/desktop}\n\
-CLEAN_SLUG=$(echo $SLUG | sed "s|^/||")\n\
-if [ -n "$CLEAN_SLUG" ]; then\n\
-  mkdir -p /usr/share/novnc/$CLEAN_SLUG\n\
-  ln -sf /usr/share/novnc/*.html /usr/share/novnc/$CLEAN_SLUG/\n\
-  ln -sf /usr/share/novnc/core /usr/share/novnc/$CLEAN_SLUG/\n\
-  ln -sf /usr/share/novnc/vendor /usr/share/novnc/$CLEAN_SLUG/\n\
-  ln -sf /usr/share/novnc/app /usr/share/novnc/$CLEAN_SLUG/\n\
-fi\n\
-# Start window managers for both displays\n\
+\n\
+# Set backgrounds and start window managers\n\
+DISPLAY=:1 xsetroot -solid "#020617"\n\
+DISPLAY=:2 xsetroot -solid "#0f172a"\n\
 DISPLAY=:1 openbox-session &\n\
 DISPLAY=:2 openbox-session &\n\
-# Start taskbar on display 1\n\
-DISPLAY=:1 tint2 &\n\
+\n\
 # Start VNC/Websockify for DISPLAY :1 (Port 6080)\n\
 x11vnc -display :1 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5901 -bg -quiet -pointer_mode 1 -noxrecord -noxfixes -noxdamage &\n\
 /usr/bin/python3 /usr/bin/websockify --web /usr/share/novnc 6080 localhost:5901 &\n\
+\n\
 # Start VNC/Websockify for DISPLAY :2 (Port 6081)\n\
 x11vnc -display :2 -rfbauth /root/.vnc/passwd -forever -shared -rfbport 5902 -bg -quiet -pointer_mode 1 -noxrecord -noxfixes -noxdamage &\n\
 /usr/bin/python3 /usr/bin/websockify --web /usr/share/novnc 6081 localhost:5902 &\n\
+\n\
 node server/index.js' > /app/entrypoint.sh \
     && chmod +x /app/entrypoint.sh
 
