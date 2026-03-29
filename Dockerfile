@@ -15,6 +15,7 @@ ENV HOME=/root
 ENV DISPLAY=:1
 ENV VNC_PORT=5901
 ENV NO_VNC_PORT=6080
+ENV _JAVA_AWT_WM_NONREPARENTING=1
 
 # Install GUI Stack, Node.js, Python, and Hacking Tools
 RUN apt-get update && apt-get install -y \
@@ -30,6 +31,7 @@ RUN apt-get update && apt-get install -y \
     x11vnc \
     novnc \
     websockify \
+    tint2 \
     # Tools
     nmap \
     john \
@@ -81,8 +83,10 @@ if [ -n "$CLEAN_SLUG" ]; then\n\
 fi\n\
 # Start minimal Openbox manager\n\
 openbox-session &\n\
-# Better VNC flags for stability\n\
-x11vnc -display :1 -nopw -forever -noxdamage -shared -rfbport 5901 -bg &\n\
+# Start taskbar for window switching\n\
+tint2 &\n\
+# Better VNC flags for stability and mouse interaction\n\
+x11vnc -display :1 -nopw -forever -shared -rfbport 5901 -bg -xkb -noxrecord -noxfixes -noxdamage -repeat &\n\
 # Start websockify directly to ensure path is correct\n\
 /usr/bin/python3 /usr/bin/websockify --web /usr/share/novnc 6080 localhost:5901 &\n\
 node server/index.js' > /app/entrypoint.sh \
