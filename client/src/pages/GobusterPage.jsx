@@ -10,9 +10,11 @@ const WORDLISTS = [
   '/usr/share/wordlists/dirb/common.txt',
   '/usr/share/wordlists/dirb/big.txt',
   '/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt',
-  '/usr/share/wordlists/dirbuster/directory-list-2.3-small.txt',
+  '/usr/share/wordlists/rockyou.txt',
   '/usr/share/seclists/Discovery/Web-Content/common.txt',
+  '/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt',
   '/usr/share/seclists/Discovery/Web-Content/raft-medium-files.txt',
+  '/usr/share/seclists/Discovery/Web-Content/api/api-endpoints.txt',
 ];
 
 export default function GobusterPage({ onBack }) {

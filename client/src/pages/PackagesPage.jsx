@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Download, Terminal, Settings2, Search, CheckCircle2, Loader2, PackageSearch } from 'lucide-react';
+import { Download, Terminal, Settings2, Search, CheckCircle2, Loader2, PackageSearch, ChevronDown, ChevronUp } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -18,7 +18,8 @@ const PACKAGES = [
   { id: 'awscli', name: 'AWS CLI', descKey: 'aws_desc' },
   { id: 'impacket', name: 'Impacket', descKey: 'impacket_desc' },
   { id: 'evilwinrm', name: 'Evil-WinRM', descKey: 'evil_winrm_desc' },
-  { id: 'responder', name: 'Responder', descKey: 'responder_desc' }
+  { id: 'responder', name: 'Responder', descKey: 'responder_desc' },
+  { id: 'seclists', name: 'SecLists', descKey: 'seclists_desc' }
 ];
 
 export default function PackagesPage() {
@@ -26,6 +27,7 @@ export default function PackagesPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [marketStatus, setMarketStatus] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [showAll, setShowAll] = useState(false);
   const [installingTool, setInstallingTool] = useState(null);
   
   const { socket } = useSocket();
@@ -100,6 +102,8 @@ export default function PackagesPage() {
     t(p.descKey).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const displayedPackages = searchQuery ? filteredPackages : (showAll ? filteredPackages : filteredPackages.slice(0, 8));
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div className="page-header" style={{ paddingBottom: 16 }}>
@@ -132,7 +136,7 @@ export default function PackagesPage() {
       </div>
 
       <div className="notes-grid" style={{ padding: '0 20px', marginBottom: 24 }}>
-        {filteredPackages.map(p => (
+        {displayedPackages.map(p => (
           <div key={p.id} className="note-card glass-card" style={{ minHeight: 140, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -168,12 +172,38 @@ export default function PackagesPage() {
             )}
           </div>
         ))}
-        {filteredPackages.length === 0 && (
+        {displayedPackages.length === 0 && (
           <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
             {t('no_tools_found')}
           </div>
         )}
       </div>
+
+      {!searchQuery && filteredPackages.length > 8 && (
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+          <button 
+            onClick={() => setShowAll(!showAll)}
+            className="btn-pro btn-outline"
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: 8,
+              padding: '8px 20px',
+              borderRadius: 10,
+              fontSize: 13,
+              fontWeight: 600,
+              border: '1px solid var(--border)',
+              background: 'var(--card-bg)'
+            }}
+          >
+            {showAll ? (
+              <> {t('show_less')} <ChevronUp size={16} /> </>
+            ) : (
+              <> {t('show_all')} <ChevronDown size={16} /> </>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Embedded Log Terminal */}
       <div style={{ flex: 1, padding: '0 20px 20px 20px', minHeight: 0 }}>

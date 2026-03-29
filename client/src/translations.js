@@ -192,7 +192,8 @@ export const translations = {
     impacket_desc: 'Ağ protokolleri ile çalışmak için Python sınıfları koleksiyonu.',
     evil_winrm_desc: 'Windows Remote Management (WinRM) sızma testi aracı.',
     responder_desc: 'LLMNR, NBT-NS ve MDNS zehirlenmesi aracı.',
-    pkg_firefox: 'VNC içerisinde kullanabileceğiniz web tarayıcısı (noVNC).',
+    seclists_desc: 'Güvenlik testleri için kullanılan devasa wordlist ve payload koleksiyonu.',
+    pkg_firefox: 'VNC içerisinde kullanabileceğiniz web taryıcısı (noVNC).',
     c_windows: 'SMBclient, Evil-WinRM ve MSSQL araçları ile Windows hedeflere saldırın.',
 
     quick_scan: 'Hızlı Port Tara',
@@ -480,6 +481,7 @@ export const translations = {
     impacket_desc: 'Collection of Python classes for working with network protocols.',
     evil_winrm_desc: 'Windows Remote Management (WinRM) penetration testing tool.',
     responder_desc: 'LLMNR, NBT-NS, and MDNS poisoning tool.',
+    seclists_desc: 'Huge collection of wordlists and payloads for security testing.',
     pkg_firefox: 'Web browser for use within VNC (noVNC).',
     c_windows: 'Attack Windows targets using SMBclient, Evil-WinRM, and MSSQL tools.',
 

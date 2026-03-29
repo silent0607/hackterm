@@ -356,7 +356,8 @@ const toolsConfig = {
   gobuster: { check: () => { try { execSync('which gobuster'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y gobuster' },
   firefox: { check: () => { try { execSync('which firefox'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y firefox' },
   redis: { check: () => { try { execSync('which redis-cli'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y redis-tools' },
-  ftp: { check: () => { try { execSync('which ftp'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y ftp' }
+  ftp: { check: () => { try { execSync('which ftp'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y ftp' },
+  seclists: { check: () => fs.existsSync('/usr/share/seclists'), cmd: 'apt-get update && apt-get install -y seclists wordlists && (gunzip /usr/share/wordlists/rockyou.txt.gz || true)' }
 };
 
 app.get('/api/market/status', (req, res) => {

@@ -54,7 +54,14 @@ export default function JohnPage({ onBack }) {
               <input className="form-input" value={hashFile} onChange={e => setHashFile(e.target.value)} />
             </div>
             <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label">Wordlist</label>
+              <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                Wordlist
+                <span style={{ fontSize: 10, opacity: 0.6 }}>Otomatik Doldur ⤵</span>
+              </label>
+              <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+                <button className="btn-pro btn-xs btn-outline" style={{ fontSize: 10, padding: '2px 6px' }} onClick={() => setWordlist('/usr/share/wordlists/rockyou.txt')}>Rockyou</button>
+                <button className="btn-pro btn-xs btn-outline" style={{ fontSize: 10, padding: '2px 6px' }} onClick={() => setWordlist('/usr/share/seclists/Passwords/Common-Credentials/10-million-password-list-top-1000.txt')}>SecLists (Top 1K)</button>
+              </div>
               <input className="form-input" value={wordlist} onChange={e => setWordlist(e.target.value)} />
             </div>
             <div className="form-group">
@@ -107,7 +114,14 @@ export default function JohnPage({ onBack }) {
               <input className="form-input" value={hashFile} onChange={e => setHashFile(e.target.value)} />
             </div>
             <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label">Wordlist</label>
+              <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                Wordlist
+                <span style={{ fontSize: 10, opacity: 0.6 }}>Otomatik Doldur ⤵</span>
+              </label>
+              <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+                <button className="btn-pro btn-xs btn-outline" style={{ fontSize: 10, padding: '2px 6px' }} onClick={() => setWordlist('/usr/share/wordlists/rockyou.txt')}>Rockyou</button>
+                <button className="btn-pro btn-xs btn-outline" style={{ fontSize: 10, padding: '2px 6px' }} onClick={() => setWordlist('/usr/share/seclists/Passwords/Common-Credentials/10-million-password-list-top-1000.txt')}>SecLists (Top 1K)</button>
+              </div>
               <input className="form-input" value={wordlist} onChange={e => setWordlist(e.target.value)} />
             </div>
             <div className="form-group">
