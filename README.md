@@ -77,4 +77,121 @@ python3 launcher.py
 *   **Docker Container**: Ubuntu 22.04 Privileged, Xvfb, noVNC, Openbox.
 *   **Integrated Security Tools**: Burp Suite, OpenVPN, Nmap, Gobuster, Netcat, Responder.
 
+---
+
+## 🛠️ Professional Deployment (Nginx & SSL)
+
+For production environments (VPS/Cloud) using a reverse proxy and Cloudflare, here is the **Master Nginx Config**:
+
+```nginx
+# 1. Global HTTPS Redirect
+server {
+    listen 80;
+    server_name yourdomain.com hackterm.yourdomain.com;
+    return 301 https://$host$request_uri;
+}
+
+# 2. Main Site (e.g. Django/PHP)
+server {
+    listen 443 ssl;
+    server_name yourdomain.com;
+
+    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000; # Your main app port
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+# 3. HackTerm (Subdomain) - RECOMMENDED
+server {
+    listen 443 ssl;
+    server_name hackterm.yourdomain.com;
+
+    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        
+        # BEYAZ EKRAN FİX / WHITE SCREEN FIX (CSP)
+        proxy_hide_header Content-Security-Policy;
+        add_header Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' wss: ws:;";
+        
+        proxy_read_timeout 86400s;
+    }
+
+    # Cloudflare-Friendly VNC Tunnels
+    location /vnc6080/ { proxy_pass http://127.0.0.1:6080/; proxy_http_version 1.1; proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection "upgrade"; }
+    location /vnc6081/ { proxy_pass http://127.0.0.1:6081/; proxy_http_version 1.1; proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection "upgrade"; }
+    location /vnc6082/ { proxy_pass http://127.0.0.1:6082/; proxy_http_version 1.1; proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection "upgrade"; }
+}
+```
+
+### ☁️ Cloudflare Settings
+1. **DNS**: Add an `A` record for `hackterm` pointing to your server IP.
+2. **Proxy Status**: You can use **Orange Cloud (Proxied) 🟠** because the Nginx config above tunnels everything via port 443.
+3. **SSL/TLS**: Set mode to **Full (Strict)**.
+
 ⭐ Don't forget to star the repo if you like it! [GitHub - silent0607/hackterm](https://github.com/silent0607/hackterm)
+
+---
+
+## 🛠️ Profesyonel Dağıtım (Nginx & SSL)
+
+Uygulamayı bir sunucu üzerinde (Django vb. ile birlikte) çalıştırmak için önerilen **Nginx Master Config** örneği:
+
+```nginx
+# 1. HTTP -> HTTPS Yönlendirme
+server {
+    listen 80;
+    server_name jafarovabdul.cloud hackterm.jafarovabdul.cloud;
+    return 301 https://$host$request_uri;
+}
+
+# 2. Ana Site (Django)
+server {
+    listen 443 ssl;
+    server_name jafarovabdul.cloud;
+
+    ssl_certificate /etc/letsencrypt/live/jafarovabdul.cloud/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/jafarovabdul.cloud/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+# 3. HackTerm (Subdomain) - ÖNERİLEN!
+server {
+    listen 443 ssl;
+    server_name hackterm.jafarovabdul.cloud;
+
+    ssl_certificate /etc/letsencrypt/live/jafarovabdul.cloud/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/jafarovabdul.cloud/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_read_timeout 86400s;
+    }
+}
+```
+
+> [!TIP]
+> **CLOUDFLARE NOTU:** Cloudflare kullanıyorsanız, `hackterm` subdomainini **DNS Only (Gri Bulut 🔘)** moduna getirin. Cloudflare Proxy (Turuncu Bulut) 3001 portunu engellemektedir.
+
+⭐ Projeyi beğendiyseniz yıldız vermeyi unutmayın! [GitHub - silent0607/hackterm](https://github.com/silent0607/hackterm)

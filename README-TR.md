@@ -71,10 +71,65 @@ python3 launcher.py
 
 ---
 
-## 🛠️ Teknoloji Yığını
+## 🛠️ Profesyonel Dağıtım (Nginx & SSL)
 
-*   **Frontend (Arayüz)**: React, Vite, Modern CSS, Lucide Icons, Çoklu-Dil (i18n) Context Mimarisi.
-*   **Backend (Sunucu)**: Node.js (Express), Socket.io (gerçek zamanlı veri izleme), Node-pty (Etkileşimli terminal).
-*   **Konteyner ve Sanallaştırma**: Docker (Ubuntu 22.04 Privileged Mod), Xvfb, noVNC, Bash.
+Uygulamayı bir sunucu üzerinde (Django, PHP vb. ile birlikte) ve Cloudflare arkasında çalıştırmak için önerilen **Master Nginx Config** örneği:
+
+```nginx
+# 1. HTTP -> HTTPS Yönlendirme
+server {
+    listen 80;
+    server_name alanadiniz.com hackterm.alanadiniz.com;
+    return 301 https://$host$request_uri;
+}
+
+# 2. Ana Site (Django/PHP vb.)
+server {
+    listen 443 ssl;
+    server_name alanadiniz.com;
+
+    ssl_certificate /etc/letsencrypt/live/alanadiniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/alanadiniz.com/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000; # Ana uygulamanızın portu
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+# 3. HackTerm (Subdomain) - ÖNERİLEN!
+server {
+    listen 443 ssl;
+    server_name hackterm.alanadiniz.com;
+
+    ssl_certificate /etc/letsencrypt/live/alanadiniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/alanadiniz.com/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        
+        # BEYAZ EKRAN FİX (CSP Ayarı)
+        proxy_hide_header Content-Security-Policy;
+        add_header Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' wss: ws:;";
+        
+        proxy_read_timeout 86400s;
+    }
+
+    # Cloudflare Dostu VNC Tünelleri (GUI Görüntüleri İçin)
+    location /vnc6080/ { proxy_pass http://127.0.0.1:6080/; proxy_http_version 1.1; proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection "upgrade"; }
+    location /vnc6081/ { proxy_pass http://127.0.0.1:6081/; proxy_http_version 1.1; proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection "upgrade"; }
+    location /vnc6082/ { proxy_pass http://127.0.0.1:6082/; proxy_http_version 1.1; proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection "upgrade"; }
+}
+```
+
+### ☁️ Cloudflare Ayarları
+1. **DNS**: `hackterm` adında bir `A` kaydı oluşturun ve sunucu IP'nizi girin.
+2. **Proxy Durumu**: **Turuncu Bulut (Proxied) 🟠** kullanabilirsiniz. Yukarıdaki Nginx konfigürasyonu her şeyi 443 portu üzerinden tünellediği için Cloudflare engeline takılmazsınız.
+3. **SSL/TLS**: Modu **Full (Strict)** (Tam - Sıkı) olarak ayarlayın.
 
 ⭐ Projeyi beğendiyseniz yıldız vermeyi unutmayın! [GitHub - silent0607/hackterm](https://github.com/silent0607/hackterm)
