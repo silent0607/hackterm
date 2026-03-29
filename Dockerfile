@@ -81,7 +81,8 @@ if [ -n "$CLEAN_SLUG" ]; then\n\
 fi\n\
 # Start minimal Openbox manager\n\
 openbox-session &\n\
-x11vnc -display :1 -nopw -forever -noxdamage -bg &\n\
+# Better VNC flags for stability\n\
+x11vnc -display :1 -nopw -forever -noxdamage -shared -rfbport 5901 -bg &\n\
 # Start websockify directly to ensure path is correct\n\
 /usr/bin/python3 /usr/bin/websockify --web /usr/share/novnc 6080 localhost:5901 &\n\
 node server/index.js' > /app/entrypoint.sh \

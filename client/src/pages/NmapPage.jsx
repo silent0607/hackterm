@@ -6,9 +6,8 @@ import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
 import { useLanguage } from '../context/LanguageContext';
 
-const termId = 'nmap-main';
-
-function NmapTerminal() {
+function NmapTerminal({ jobId }) {
+  const termId = `nmap-${jobId || 'default'}`;
   const containerRef = useRef(null);
   const { isReady } = useTerminal(termId, containerRef);
   return (
@@ -27,11 +26,13 @@ function NmapTerminal() {
 }
 
 export default function NmapPage({ onBack }) {
-  const { activeJob, updateJob } = useJobs();
+  const { activeJob, activeJobId, updateJob } = useJobs();
   const { t } = useLanguage();
   const { socket } = useSocket();
   const [ip, setIp] = useState(activeJob?.ip || '');
   const [ports, setPorts] = useState('');
+
+  const termId = `nmap-${activeJobId || 'default'}`;
 
   const quickScan = () => {
     const target = ip || activeJob?.ip || '';
@@ -84,25 +85,25 @@ export default function NmapPage({ onBack }) {
         <span><b>Versiyon tarama:</b> Önce hızlı tara, açık portları gir → sadece o portların servis/versiyon bilgisini al</span>
       </div>
 
-      <NmapTerminal />
+      <NmapTerminal jobId={activeJobId} />
 
       <div style={{ marginTop: 20 }}>
         <SectionTitle icon="📋">Nmap Komut Referansı</SectionTitle>
         <InfoCard title="Tarama Türleri" icon="🔍" defaultOpen color="green">
-          <CmdLine cmd="nmap -p- -sS --min-rate=1000 -T4 <ip>" desc="-p-: tüm portlar | -sS: SYN tarama | -T4: hızlı | --min-rate=1000: minimum paket hızı" termId={termId} />
-          <CmdLine cmd="nmap -sV -p <portlar> <ip>" desc="Belirli portlarda servis/versiyon tespiti" termId={termId} />
-          <CmdLine cmd="nmap -A -p <portlar> <ip>" desc="-A: OS tespiti + script tarama + traceroute" termId={termId} />
-          <CmdLine cmd="nmap -sU --top-ports 100 <ip>" desc="UDP port tarama (yavaş olabilir)" termId={termId} />
+          <CmdLine cmd={`nmap -p- -sS --min-rate=1000 -T4 <ip>`} desc="-p-: tüm portlar | -sS: SYN tarama | -T4: hızlı | --min-rate=1000: minimum paket hızı" termId={termId} />
+          <CmdLine cmd={`nmap -sV -p <portlar> <ip>`} desc="Belirli portlarda servis/versiyon tespiti" termId={termId} />
+          <CmdLine cmd={`nmap -A -p <portlar> <ip>`} desc="-A: OS tespiti + script tarama + traceroute" termId={termId} />
+          <CmdLine cmd={`nmap -sU --top-ports 100 <ip>`} desc="UDP port tarama (yavaş olabilir)" termId={termId} />
         </InfoCard>
         <InfoCard title="Script Taramaları (NSE)" icon="📜" color="cyan">
-          <CmdLine cmd="nmap --script=vuln <ip>" desc="Güvenlik açıklarını tara" termId={termId} />
-          <CmdLine cmd="nmap --script=smb-enum-shares <ip>" desc="SMB paylaşımlarını listele" termId={termId} />
-          <CmdLine cmd="nmap --script=ftp-anon <ip>" desc="Anonim FTP erişimini kontrol et" termId={termId} />
-          <CmdLine cmd="nmap --script=http-title -p 80,443,8080 <ip>" desc="HTTP başlıklarını göster" termId={termId} />
+          <CmdLine cmd={`nmap --script=vuln <ip>`} desc="Güvenlik açıklarını tara" termId={termId} />
+          <CmdLine cmd={`nmap --script=smb-enum-shares <ip>`} desc="SMB paylaşımlarını listele" termId={termId} />
+          <CmdLine cmd={`nmap --script=ftp-anon <ip>`} desc="Anonim FTP erişimini kontrol et" termId={termId} />
+          <CmdLine cmd={`nmap --script=http-title -p 80,443,8080 <ip>`} desc="HTTP başlıklarını göster" termId={termId} />
         </InfoCard>
         <InfoCard title="Çıktı Kaydetme" icon="💾" color="purple">
-          <CmdLine cmd="nmap -oN sonuc.txt <ip>" desc="Normal formatta kaydet" termId={termId} />
-          <CmdLine cmd="nmap -oA tara <ip>" desc="Tüm formatlarda kaydet (normal, XML, grep)" termId={termId} />
+          <CmdLine cmd={`nmap -oN sonuc.txt <ip>`} desc="Normal formatta kaydet" termId={termId} />
+          <CmdLine cmd={`nmap -oA tara <ip>`} desc="Tüm formatlarda kaydet (normal, XML, grep)" termId={termId} />
         </InfoCard>
       </div>
     </div>

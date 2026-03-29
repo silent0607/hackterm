@@ -156,11 +156,23 @@ app.post('/api/burp/install', (req, res) => {
 });
 
 app.post('/api/burp/run', (req, res) => {
-  spawn('sh', [path.join(TOOLS_DIR, 'burp', 'BurpSuiteCommunity')], {
-    env: { ...process.env, DISPLAY: ':1' },
-    detached: true
-  }).unref();
-  res.json({ message: 'Burp Suite başlatıldı' });
+  const burpPath = path.join(TOOLS_DIR, 'burp', 'BurpSuiteCommunity');
+  if (!fs.existsSync(burpPath)) {
+    return res.status(404).json({ error: 'Burp Suite bulunamadı. Lütfen önce kurulum yapın.' });
+  }
+
+  const proc = spawn('sh', [burpPath], {
+    env: { ...process.env, DISPLAY: ':1' }
+  });
+
+  proc.stdout.on('data', data => io.emit('package:log', `[Burp STDOUT] ${data.toString()}`));
+  proc.stderr.on('data', data => io.emit('package:log', `[Burp STDERR] ${data.toString()}`));
+  
+  proc.on('close', code => {
+    io.emit('package:log', `\n>>> Burp Suite durduruldu (kod: ${code}) <<<\n`);
+  });
+
+  res.json({ message: 'Burp Suite başlatıldı. Logları takip edebilirsiniz.' });
 });
 
 // FTP/Downloads watcher
@@ -247,15 +259,36 @@ app.post('/api/desktop/install', (req, res) => {
   res.json({ message: 'Kurulum başlatıldı. Birkaç dakika sürebilir.' });
 });
 
-// Active terminal sessions
+// Active terminal sessions & output buffers
 const terminals = {};
+const terminalBuffers = {}; // id -> string buffer
 const sshSessions = {};
+const MAX_BUFFER_SIZE = 10000;
+
+function addToBuffer(id, data) {
+  if (!terminalBuffers[id]) terminalBuffers[id] = '';
+  terminalBuffers[id] += data;
+  if (terminalBuffers[id].length > MAX_BUFFER_SIZE) {
+    terminalBuffers[id] = terminalBuffers[id].slice(-MAX_BUFFER_SIZE);
+  }
+}
 
 io.on('connection', (socket) => {
   console.log('[+] Client bağlandı:', socket.id);
 
   // --- Local PTY Terminal ---
   socket.on('terminal:create', ({ id, shell, venv }) => {
+    // If terminal already exists, just re-attach
+    if (terminals[id]) {
+      console.log(`[PTY] Re-attaching to existing terminal: ${id}`);
+      // Send history if exists
+      if (terminalBuffers[id]) {
+        socket.emit(`terminal:data:${id}`, terminalBuffers[id]);
+      }
+      socket.emit(`terminal:ready:${id}`);
+      return;
+    }
+
     let shellCmd = shell || process.env.SHELL || '/bin/bash';
     let env = { ...process.env, TERM: 'xterm-256color' };
 
@@ -277,12 +310,14 @@ io.on('connection', (socket) => {
       terminals[id] = term;
 
       term.onData((data) => {
-        socket.emit(`terminal:data:${id}`, data);
+        addToBuffer(id, data);
+        io.emit(`terminal:data:${id}`, data);
       });
 
       term.onExit(() => {
-        socket.emit(`terminal:exit:${id}`);
+        io.emit(`terminal:exit:${id}`);
         delete terminals[id];
+        delete terminalBuffers[id];
       });
 
       socket.emit(`terminal:ready:${id}`);
@@ -303,6 +338,7 @@ io.on('connection', (socket) => {
     if (terminals[id]) {
       terminals[id].kill();
       delete terminals[id];
+      delete terminalBuffers[id];
     }
   });
 

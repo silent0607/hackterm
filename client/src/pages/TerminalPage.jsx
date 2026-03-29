@@ -1,10 +1,9 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Plus, X, Pin, PinOff } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
 import { useTerminal } from '../hooks/useTerminal';
 import { useLanguage } from '../context/LanguageContext';
-
-let termCounter = 0;
+import { useJobs } from '../context/JobContext';
 
 function SingleTerm({ id, title, onClose, pinned, onTogglePin }) {
   const containerRef = useRef(null);
@@ -46,19 +45,46 @@ function SingleTerm({ id, title, onClose, pinned, onTogglePin }) {
 
 export default function MultiTerminalPage() {
   const { t } = useLanguage();
-  const [terms, setTerms] = useState(() => {
-    termCounter++;
-    return [{ id: `term-${termCounter}`, title: 'bash', pinned: true }];
-  });
+  const { activeJobId } = useJobs();
+  const { socket } = useSocket();
+
+  const getStorageKey = useCallback(() => `htb_terms_${activeJobId || 'default'}`, [activeJobId]);
+
+  const [terms, setTerms] = useState([]);
   const [venv, setVenv] = useState(false);
 
+  // Load terms for active job
+  useEffect(() => {
+    if (!activeJobId) {
+      setTerms([{ id: `term-default-1`, title: 'bash', pinned: true }]);
+      return;
+    }
+    const saved = localStorage.getItem(getStorageKey());
+    if (saved) {
+      try { setTerms(JSON.parse(saved)); } catch (e) { setTerms([{ id: `term-${activeJobId}-1`, title: 'bash', pinned: true }]); }
+    } else {
+      setTerms([{ id: `term-${activeJobId}-1`, title: 'bash', pinned: true }]);
+    }
+  }, [activeJobId, getStorageKey]);
+
+  // Save terms when they change
+  useEffect(() => {
+    if (terms.length > 0 && activeJobId) {
+      localStorage.setItem(getStorageKey(), JSON.stringify(terms));
+    }
+  }, [terms, activeJobId, getStorageKey]);
+
   const addTerm = () => {
-    termCounter++;
-    const id = `term-${termCounter}`;
-    setTerms(p => [...p, { id, title: `bash-${termCounter}`, pinned: false }]);
+    const nextIndex = terms.length + 1;
+    const id = `term-${activeJobId || 'default'}-${Date.now()}`;
+    setTerms(p => [...p, { id, title: `bash-${nextIndex}`, pinned: false }]);
   };
 
-  const closeTerm = (id) => setTerms(p => p.filter(t => t.id !== id));
+  const closeTerm = (id) => {
+    if (socket) socket.emit('terminal:close', { id });
+    setTerms(p => p.filter(t => t.id !== id));
+  };
+
   const togglePin = (id) => setTerms(p => p.map(t => t.id === id ? { ...t, pinned: !t.pinned } : t));
 
   return (

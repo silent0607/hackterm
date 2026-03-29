@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { InfoCard, SectionTitle } from '../components/InfoCard';
-import { Monitor, Upload, Play, Package, ExternalLink, ShieldCheck } from 'lucide-react';
+import { Monitor, Upload, Play, Package, ExternalLink, ShieldCheck, Terminal as TerminalIcon } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function BurpPage({ onBack }) {
@@ -13,6 +13,8 @@ export default function BurpPage({ onBack }) {
   const [selectedFile, setSelectedFile] = useState('');
   const [installing, setInstalling] = useState(false);
   const [running, setRunning] = useState(false);
+  const [logs, setLogs] = useState([]);
+  const logEndRef = useRef(null);
 
   const fetchStatus = async () => {
     try {
@@ -44,6 +46,18 @@ export default function BurpPage({ onBack }) {
     fetchEnv();
   }, []);
 
+  useEffect(() => {
+    if (!socket) return;
+    const handleLog = (data) => {
+      setLogs(prev => [...prev, data]);
+      setTimeout(() => {
+        logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
+    };
+    socket.on('package:log', handleLog);
+    return () => socket.off('package:log', handleLog);
+  }, [socket]);
+
   const vncUrl = `http://${window.location.hostname}:${envInfo.novncPort}${envInfo.desktopPath}/vnc.html?host=${window.location.hostname}&port=${envInfo.novncPort}&autoconnect=true`;
 
   const handleUpload = async (e) => {
@@ -61,6 +75,7 @@ export default function BurpPage({ onBack }) {
   const handleInstall = async () => {
     if (!selectedFile) return;
     setInstalling(true);
+    setLogs([`>>> Burp Suite kurulumu başlatılıyor: ${selectedFile} <<<\n`]);
     try {
       await fetch('/api/burp/install', {
         method: 'POST',
@@ -73,6 +88,7 @@ export default function BurpPage({ onBack }) {
 
   const handleRun = async () => {
     setRunning(true);
+    setLogs(prev => [...prev, `\n>>> Burp Suite çalıştırılıyor... <<<\n`]);
     try {
       await fetch('/api/burp/run', { method: 'POST' });
     } catch (e) {} finally { setRunning(false); }
@@ -88,7 +104,7 @@ export default function BurpPage({ onBack }) {
   };
 
   return (
-    <div>
+    <div style={{ paddingBottom: 40 }}>
       <div className="page-header">
         <div>
           <div className="page-header-back" onClick={onBack}>{t('back_to_menu')}</div>
@@ -162,7 +178,27 @@ export default function BurpPage({ onBack }) {
         </div>
       </div>
 
-      <div style={{ marginTop: 20 }}>
+      <div style={{ marginTop: 24 }}>
+        <SectionTitle icon={<TerminalIcon size={16} />}>Burp Suite Konsolu</SectionTitle>
+        <div className="terminal-pro" style={{ height: 300 }}>
+          <div className="terminal-pro-header">
+            <div className="terminal-dot red" />
+            <div className="terminal-dot yellow" />
+            <div className="terminal-dot green" />
+            <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono', marginLeft: 12 }}>burp_logs.log</span>
+          </div>
+          <div style={{
+            flex: 1,
+            background: 'transparent',
+            padding: 16, overflowY: 'auto', fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: '#4ade80', whiteSpace: 'pre-wrap', wordWrap: 'break-word'
+          }}>
+            {logs.length ? logs.join('') : '> Bekleniyor...'}
+            <div ref={logEndRef} />
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginTop: 24 }}>
         <InfoCard title={t('usage_guide')} icon="💡" color="cyan">
           <div className="cmd-desc">
             <b>1. Firefox & Burp</b>: {t('guide_1')}<br/><br/>

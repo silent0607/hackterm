@@ -106,7 +106,7 @@ export function useTerminal(termId, containerRef, options = {}) {
       socket.off(`terminal:data:${termId}`, dataHandler);
       socket.off(`terminal:ready:${termId}`, readyHandler);
       socket.off(`terminal:exit:${termId}`, exitHandler);
-      socket.emit('terminal:close', { id: termId });
+      // socket.emit('terminal:close', { id: termId }); // Removed for persistence
       ro.disconnect();
       term.dispose();
       termRef.current = null;
