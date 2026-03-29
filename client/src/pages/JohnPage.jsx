@@ -4,6 +4,7 @@ import { useSocket } from '../context/SocketContext';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
 import Terminal from '../components/Terminal';
+import FilePicker from '../components/FilePicker';
 
 const HASH_TYPES = [
   { label: 'MD5', john: 'raw-md5', hashcat: '0' },
@@ -22,6 +23,7 @@ export default function JohnPage({ onBack }) {
   const [wordlist, setWordlist] = useState('/usr/share/wordlists/rockyou.txt');
   const [hashType, setHashType] = useState('');
   const [tab, setTab] = useState('john');
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
 
   const johnTermId = `john-${activeJobId || 'default'}`;
   const hashTermId = `hashcat-${activeJobId || 'default'}`;
@@ -61,6 +63,7 @@ export default function JohnPage({ onBack }) {
               <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
                 <button className="btn-pro btn-xs btn-outline" style={{ fontSize: 10, padding: '2px 6px' }} onClick={() => setWordlist('/usr/share/wordlists/rockyou.txt')}>Rockyou</button>
                 <button className="btn-pro btn-xs btn-outline" style={{ fontSize: 10, padding: '2px 6px' }} onClick={() => setWordlist('/usr/share/seclists/Passwords/Common-Credentials/10-million-password-list-top-1000.txt')}>SecLists (Top 1K)</button>
+                <button className="btn-pro btn-xs btn-outline" style={{ fontSize: 10, padding: '2px 6px' }} onClick={() => setIsPickerOpen(true)}>Gözat...</button>
               </div>
               <input className="form-input" value={wordlist} onChange={e => setWordlist(e.target.value)} />
             </div>
@@ -121,6 +124,7 @@ export default function JohnPage({ onBack }) {
               <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
                 <button className="btn-pro btn-xs btn-outline" style={{ fontSize: 10, padding: '2px 6px' }} onClick={() => setWordlist('/usr/share/wordlists/rockyou.txt')}>Rockyou</button>
                 <button className="btn-pro btn-xs btn-outline" style={{ fontSize: 10, padding: '2px 6px' }} onClick={() => setWordlist('/usr/share/seclists/Passwords/Common-Credentials/10-million-password-list-top-1000.txt')}>SecLists (Top 1K)</button>
+                <button className="btn-pro btn-xs btn-outline" style={{ fontSize: 10, padding: '2px 6px' }} onClick={() => setIsPickerOpen(true)}>Gözat...</button>
               </div>
               <input className="form-input" value={wordlist} onChange={e => setWordlist(e.target.value)} />
             </div>
@@ -166,6 +170,14 @@ export default function JohnPage({ onBack }) {
           </InfoCard>
         </>
       )}
+
+      <FilePicker 
+        isOpen={isPickerOpen} 
+        onClose={() => setIsPickerOpen(false)} 
+        onSelect={(path) => setWordlist(path)}
+        title="Wordlist Seçici"
+        baseDir="/usr/share/seclists"
+      />
     </div>
   );
 }

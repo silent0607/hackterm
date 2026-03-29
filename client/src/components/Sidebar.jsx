@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutGrid, Monitor, FolderTree, Package, FileText, Settings, Languages, Home, Plus, Trash2, Pin, Keyboard } from 'lucide-react';
+import { LayoutGrid, Monitor, FolderTree, Package, FileText, Settings, Languages, Home, Plus, Trash2, Pin, Keyboard, Upload, X, ShieldAlert } from 'lucide-react';
 import { useJobs } from '../context/JobContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -31,6 +31,9 @@ const ALL_TOOLS = [
   { id: 'aws',        label: 'tool_aws',     icon: <Pin size={14} /> },
   { id: 'grep',       label: 'tool_grep',    icon: <Pin size={14} /> },
   { id: 'wireshark',  label: 'tool_wireshark',icon: <Pin size={14} /> },
+  { id: 'nuclei',     label: 'tool_nuclei',   icon: <Pin size={14} /> },
+  { id: 'openvas',    label: 'tool_openvas',  icon: <Pin size={14} /> },
+  { id: 'metasploit', label: 'tool_metasploit',icon: <Pin size={14} /> },
 ];
 
 export default function Sidebar({ currentPage, onNavigate }) {
@@ -40,12 +43,38 @@ export default function Sidebar({ currentPage, onNavigate }) {
   const [newJobModal, setNewJobModal] = useState(false);
   const [newName, setNewName] = useState('');
   const [newIp, setNewIp] = useState('');
+  const [uploadModal, setUploadModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const handleAddJob = () => {
     addJob(newName || 'Yeni İş', newIp);
     setNewName('');
     setNewIp('');
     setNewJobModal(false);
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const resp = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      if (resp.ok) {
+        alert(t('upload_success') || 'Dosya başarıyla yüklendi!');
+        setUploadModal(false);
+      }
+    } catch (e) {
+      alert('Upload error: ' + e.message);
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -123,6 +152,48 @@ export default function Sidebar({ currentPage, onNavigate }) {
           <span style={{ fontSize: 12, fontWeight: 600 }}>{language === 'tr' ? 'TURKISH | EN' : 'ENGLISH | TR'}</span>
         </div>
       </div>
+
+      {/* Upload Modal */}
+      {uploadModal && (
+        <div className="guard-overlay" style={{ zIndex: 300 }} onClick={() => setUploadModal(false)}>
+          <div className="glass-card" style={{ width: 400, padding: 32 }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <h2 style={{ margin: 0, fontSize: 18 }}>⬡ {t('quick_upload') || 'Dosya Yükle'}</h2>
+              <X size={20} className="clickable" onClick={() => setUploadModal(false)} />
+            </div>
+            
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
+              {t('upload_desc') || 'Dosya /app/downloads dizinine kaydedilecektir.'}
+            </p>
+
+            <div className="form-group" style={{ marginBottom: 24 }}>
+              <div 
+                style={{ 
+                  border: '2px dashed var(--border)', 
+                  borderRadius: 12, 
+                  padding: 40, 
+                  textAlign: 'center',
+                  background: 'rgba(255,255,255,0.02)',
+                  cursor: 'pointer'
+                }}
+                onClick={() => document.getElementById('sidebar-file-input').click()}
+              >
+                <Upload size={32} color="var(--accent-cyan)" style={{ marginBottom: 12, opacity: 0.5 }} />
+                <div style={{ fontSize: 14 }}>{uploading ? t('uploading') + '...' : t('select_file')}</div>
+              </div>
+              <input 
+                id="sidebar-file-input" 
+                type="file" 
+                hidden 
+                onChange={handleFileUpload} 
+                disabled={uploading}
+              />
+            </div>
+            
+            <button className="btn-pro btn-outline btn-full" onClick={() => setUploadModal(false)}>{t('cancel')}</button>
+          </div>
+        </div>
+      )}
 
       {/* Job Modal */}
       {newJobModal && (

@@ -21,7 +21,8 @@ import {
   PinOff,
   ChevronDown,
   ChevronUp,
-  Activity
+  Activity,
+  Scan
 } from 'lucide-react';
 
 const TOOLS = [
@@ -40,6 +41,9 @@ const TOOLS = [
   { id: 'aws', icon: <Cloud />, color: 'yellow', label: 'tool_aws', desc: 'c_aws' },
   { id: 'grep', icon: <Layers />, color: 'cyan', label: 'tool_grep', desc: 'c_grep' },
   { id: 'wireshark', icon: <Activity />, color: 'blue', label: 'tool_wireshark', desc: 'c_wireshark' },
+  { id: 'nuclei', icon: <Scan />, color: 'cyan', label: 'tool_nuclei', desc: 'c_nuclei' },
+  { id: 'metasploit', icon: <Cpu />, color: 'red', label: 'tool_metasploit', desc: 'c_msf' },
+  { id: 'openvas', icon: <Shield />, color: 'green', label: 'tool_openvas', desc: 'c_openvas' },
 ];
 
 export default function HomePage({ onNavigate }) {

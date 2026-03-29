@@ -5,6 +5,7 @@ import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
 import { useLanguage } from '../context/LanguageContext';
 import Terminal from '../components/Terminal';
+import FilePicker from '../components/FilePicker';
 
 const WORDLISTS = [
   '/usr/share/wordlists/dirb/common.txt',
@@ -22,8 +23,8 @@ export default function GobusterPage({ onBack }) {
   const { t } = useLanguage();
   const { socket } = useSocket();
   const [ip, setIp] = useState(activeJob?.ip || '');
-  const [wordlist, setWordlist] = useState('/usr/share/wordlists/dirb/common.txt');
-  const [customWl, setCustomWl] = useState('');
+  const [wordlist, setWordlist] = useState('/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-small.txt');
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [ext, setExt] = useState('php,html,txt,bak');
   const [threads, setThreads] = useState('50');
 
@@ -34,7 +35,7 @@ export default function GobusterPage({ onBack }) {
       if (!target.startsWith('http')) target = 'http://' + target;
       return target;
   };
-  const getWl = () => customWl || wordlist;
+  const getWl = () => wordlist;
 
   const runDir = () => {
     const target = ip || activeJob?.ip || '';
@@ -65,19 +66,15 @@ export default function GobusterPage({ onBack }) {
       </div>
 
       <div className="notes-grid" style={{ marginBottom: 24, gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-        <div className="form-group">
-          <label className="form-label">Wordlist Seç</label>
-          <select className="form-select" value={wordlist} onChange={e => setWordlist(e.target.value)}>
-            {WORDLISTS.map(w => <option key={w} value={w}>{w.split('/').pop()}</option>)}
-            <option value="custom">Özel Yol...</option>
-          </select>
+        <div className="form-group" style={{ marginBottom: 16 }}>
+          <label className="form-label">{t('wordlist')}</label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input className="form-input" value={wordlist} onChange={e => setWordlist(e.target.value)} />
+            <button className="btn-pro btn-outline" onClick={() => setIsPickerOpen(true)} style={{ width: 120 }}>
+              {t('browse') || 'Gözat'}
+            </button>
+          </div>
         </div>
-        {wordlist === 'custom' && (
-            <div className="form-group">
-                <label className="form-label">Özel Wordlist Yolu</label>
-                <input className="form-input" value={customWl} onChange={e => setCustomWl(e.target.value)} placeholder="/path/to/list.txt" />
-            </div>
-        )}
         <div className="form-group">
           <label className="form-label">Uzantılar (-x)</label>
           <input className="form-input" value={ext} onChange={e => setExt(e.target.value)} placeholder="php,html,txt" />
@@ -93,7 +90,15 @@ export default function GobusterPage({ onBack }) {
         <button className="btn-pro btn-purple" onClick={runDns}>🔗 DNS Tara</button>
       </div>
 
-      <Terminal id={termId} title="Gobuster Terminal" height={320} />
+      <Terminal id={termId} title="Gobuster Engine Console" height={320} />
+
+      <FilePicker 
+        isOpen={isPickerOpen} 
+        onClose={() => setIsPickerOpen(false)} 
+        onSelect={(path) => setWordlist(path)}
+        title={t('select_wordlist') || 'Wordlist Seç'}
+        baseDir="/usr/share/seclists"
+      />
 
       <div style={{ marginTop: 20 }}>
         <SectionTitle icon="📋">Gobuster Referansı</SectionTitle>

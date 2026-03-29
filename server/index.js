@@ -281,6 +281,20 @@ function buildFileTree(dir) {
   return result;
 }
 
+app.get('/api/files/tree', (req, res) => {
+  const { base } = req.query;
+  const targetDir = base || FTP_DIR;
+  // Basic safety: avoid root browsing unless specific allowed paths
+  const allowed = ['/usr/share/seclists', '/usr/share/wordlists', '/app/downloads', '/app/.tools', '/etc/openvpn'];
+  const isAllowed = allowed.some(p => targetDir.startsWith(p)) || targetDir === '/';
+  
+  if (!isAllowed && !targetDir.startsWith(FTP_DIR)) {
+    return res.status(403).json({ error: 'Bu dizine erişim yetkiniz yok.' });
+  }
+
+  res.json({ tree: buildFileTree(targetDir) });
+});
+
 ftpWatcher.on('all', (event, filePath) => {
   const tree = buildFileTree(FTP_DIR);
   io.emit('ftp:update', { tree, event, path: filePath });
@@ -358,7 +372,10 @@ const toolsConfig = {
   redis: { check: () => { try { execSync('which redis-cli'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y redis-tools' },
   ftp: { check: () => { try { execSync('which ftp'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y ftp' },
   seclists: { check: () => fs.existsSync('/usr/share/seclists'), cmd: 'apt-get update && apt-get install -y git curl && mkdir -p /usr/share/seclists && git clone --depth 1 https://github.com/danielmiessler/SecLists.git /usr/share/seclists && mkdir -p /usr/share/wordlists && curl -L https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt -o /usr/share/wordlists/rockyou.txt' },
-  nano: { check: () => { try { execSync('which nano'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y nano' }
+  nano: { check: () => { try { execSync('which nano'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y nano' },
+  nuclei: { check: () => { try { execSync('which nuclei'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y wget unzip && wget https://github.com/projectdiscovery/nuclei/releases/download/v3.2.3/nuclei_3.2.3_linux_amd64.zip && unzip nuclei*.zip && mv nuclei /usr/local/bin && rm nuclei*.zip' },
+  metasploit: { check: () => { try { execSync('which msfconsole'); return true; } catch{ return false; } }, cmd: 'curl https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > msfinstall && chmod 755 msfinstall && ./msfinstall' },
+  openvas: { check: () => { try { execSync('which gsad'); return true; } catch{ return false; } }, cmd: 'apt-get update && apt-get install -y gvmd gsad openvas-scanner' }
 };
 
 app.get('/api/market/status', (req, res) => {
