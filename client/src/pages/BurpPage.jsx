@@ -86,47 +86,58 @@ export default function BurpPage({ onBack }) {
   const vncUrl = getVncUrl('6080');
   const firefoxUrl = getVncUrl('6081');
 
-  const handleUpload = (e) => {
+  const handleUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append('file', file);
+    const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks (Cloudflare compatible)
+    const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+    
+    setIsUploading(true);
+    setUploadProgress(0);
 
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/upload', true);
+    try {
+        for (let i = 0; i < totalChunks; i++) {
+            const start = i * CHUNK_SIZE;
+            const end = Math.min(file.size, start + CHUNK_SIZE);
+            const chunk = file.slice(start, end);
 
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        const percent = Math.round((event.loaded / event.total) * 100);
-        setUploadProgress(percent);
-      }
-    };
+            const formData = new FormData();
+            formData.append('file', chunk);
+            formData.append('chunkIndex', i);
+            formData.append('totalChunks', totalChunks);
+            formData.append('filename', file.name);
 
-    xhr.onloadstart = () => {
-      setIsUploading(true);
-      setUploadProgress(0);
-    };
+            await new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/api/upload/chunk', true);
+                
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        const currentProgress = Math.round(((i + 1) / totalChunks) * 100);
+                        setUploadProgress(currentProgress);
+                        resolve();
+                    } else {
+                        reject(new Error(`Server error: ${xhr.status}`));
+                    }
+                };
+                
+                xhr.onerror = () => reject(new Error('Network error or connection lost.'));
+                xhr.send(formData);
+            });
+        }
 
-    xhr.onload = () => {
-      if (xhr.status === 200) {
+        // Successfully merged on server side
         setUploadProgress(100);
         setTimeout(() => {
-          setIsUploading(false);
-          fetchFiles();
-        }, 1000);
-      } else {
-        alert(t('error'));
+            setIsUploading(false);
+            fetchFiles();
+        }, 1200);
+        
+    } catch (err) {
+        alert(t('error') + ': ' + err.message);
         setIsUploading(false);
-      }
-    };
-
-    xhr.onerror = () => {
-      alert(t('error'));
-      setIsUploading(false);
-    };
-
-    xhr.send(formData);
+    }
   };
 
   const handleLaunchFirefox = async () => {
