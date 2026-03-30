@@ -25,8 +25,8 @@ export default function WiresharkPage({ onBack }) {
     // Start wireshark on display :3 with DBUS session and environment fixes
     if (socket) {
       socket.emit('terminal:create', { id: termId });
-      // Use dbus-run-session to satisfy Qt requirements and capture errors to terminal
-      const launchCmd = 'export XDG_RUNTIME_DIR=/tmp && DISPLAY=:3 dbus-run-session wireshark 2>&1\n';
+      // Improved launch command with QT and DBUS fixes
+      const launchCmd = 'export XDG_RUNTIME_DIR=/tmp && export QT_X11_NO_MITSHM=1 && DISPLAY=:3 dbus-run-session wireshark 2>&1\n';
       socket.emit(`terminal:input:${termId}`, launchCmd);
     }
   };

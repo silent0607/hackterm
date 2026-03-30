@@ -289,6 +289,18 @@ app.post('/api/burp/install', (req, res) => {
     proc.stdout.on('data', data => io.emit(`terminal:data:${termId}`, data.toString()));
     proc.stderr.on('data', data => io.emit(`terminal:data:${termId}`, data.toString()));
     proc.on('close', code => {
+      if (code === 0) {
+        // Create symlink so it's in PATH
+        try {
+          const target = path.join(installPath, 'BurpSuiteCommunity');
+          const link = '/usr/local/bin/burpsuite';
+          if (fs.existsSync(link)) fs.unlinkSync(link);
+          fs.symlinkSync(target, link);
+          console.log('[+] Burp Suite symlink created at /usr/local/bin/burpsuite');
+        } catch (e) {
+          console.error('[!] Failed to create Burp symlink:', e);
+        }
+      }
       io.emit(`terminal:data:${termId}`, `\n>>> Burp Suite kurulum tamamlandı (kod: ${code}) <<<\n`);
       io.emit('package:done', code);
     });

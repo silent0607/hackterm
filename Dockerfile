@@ -51,8 +51,15 @@ RUN apt-get update && apt-get install -y \
     openvpn \
     firefox \
     dirb \
-    wireshark \
     dbus-x11 \
+    libcap2-bin \
+    libxcursor1 \
+    libxinerama1 \
+    libxrandr2 \
+    libxi6 \
+    # Pre-configure Wireshark for non-interactive install
+    && echo "wireshark-common wireshark-common/install-setuid boolean true" | debconf-set-selections \
+    && apt-get update && apt-get install -y wireshark \
     && curl -L https://github.com/OJ/gobuster/releases/download/v3.6.0/gobuster_Linux_x86_64.tar.gz -o gobuster.tar.gz \
     && tar -xzf gobuster.tar.gz \
     && mv gobuster /usr/bin/gobuster \
