@@ -3,7 +3,7 @@ import { useJobs } from '../context/JobContext';
 import { useSocket } from '../context/SocketContext';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
-import Terminal from '../components/Terminal';
+import MultiTerminal, { useMultiTerminalId } from '../components/MultiTerminal';
 
 export default function RedisPage({ onBack }) {
   const { activeJob, activeJobId, updateJob } = useJobs();
@@ -11,7 +11,7 @@ export default function RedisPage({ onBack }) {
   const [ip, setIp] = useState(activeJob?.ip || '');
   const [port, setPort] = useState('6379');
 
-  const termId = `redis-${activeJobId || 'default'}`;
+  const termId = useMultiTerminalId('redis');
 
   const connect = () => {
     const target = ip || activeJob?.ip || '';
@@ -44,7 +44,7 @@ export default function RedisPage({ onBack }) {
         <button className="btn-pro btn-cyan" onClick={connectLocal}>🏠 Localhost Bağlan</button>
       </div>
 
-      <Terminal id={termId} title="Redis Terminal" height={260} />
+      <MultiTerminal prefix="redis" defaultTitle="Redis Terminal" />
 
       <div style={{ marginTop: 24 }}>
         <SectionTitle icon="📋">Redis Komut Referansı</SectionTitle>

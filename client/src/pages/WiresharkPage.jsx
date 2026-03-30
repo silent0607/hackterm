@@ -4,14 +4,14 @@ import { useJobs } from '../context/JobContext';
 import { useLanguage } from '../context/LanguageContext';
 import { InfoCard, SectionTitle, CmdLine } from '../components/InfoCard';
 import { Monitor, Activity, Terminal as TermIcon, Play, ShieldAlert, Wifi } from 'lucide-react';
-import Terminal from '../components/Terminal';
+import MultiTerminal, { useMultiTerminalId } from '../components/MultiTerminal';
 
 export default function WiresharkPage({ onBack }) {
   const { t } = useLanguage();
   const { socket } = useSocket();
   const { activeJobId } = useJobs();
   const [running, setRunning] = useState(false);
-  const termId = `wireshark-${activeJobId || 'default'}`;
+  const termId = useMultiTerminalId('wireshark');
 
   // Wireshark is on Port 6082 (Display :3)
   // SSL/Nginx Cloudflare Aware VNC Urls
@@ -92,7 +92,7 @@ export default function WiresharkPage({ onBack }) {
         </div>
       </div>
 
-      <Terminal id={termId} title="Wireshark Controller" height={160} />
+      <MultiTerminal prefix="wireshark" defaultTitle="Wireshark Controller" />
 
       <div style={{ marginTop: 24 }}>
         <SectionTitle icon={<ShieldAlert size={16} />}>Capture Guide</SectionTitle>

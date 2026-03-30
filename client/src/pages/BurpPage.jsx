@@ -4,7 +4,7 @@ import { useJobs } from '../context/JobContext';
 import { useLanguage } from '../context/LanguageContext';
 import { InfoCard, SectionTitle } from '../components/InfoCard';
 import { Monitor, Upload, Play, Package, ShieldCheck, Chrome } from 'lucide-react';
-import Terminal from '../components/Terminal';
+import MultiTerminal, { useMultiTerminalId } from '../components/MultiTerminal';
 
 export default function BurpPage({ onBack }) {
   const { t } = useLanguage();
@@ -19,7 +19,7 @@ export default function BurpPage({ onBack }) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  const termId = `burp-${activeJobId || 'default'}`;
+  const termId = useMultiTerminalId('burp');
 
   const fetchStatus = async () => {
     try {
@@ -235,7 +235,7 @@ export default function BurpPage({ onBack }) {
         </div>
       </div>
 
-      <Terminal id={termId} title="Burp Suite Konsolu / Logs" height={280} />
+      <MultiTerminal prefix="burp" defaultTitle="Burp Suite Console" />
 
       <div style={{ marginTop: 24 }}>
         <InfoCard title={t('usage_guide')} icon="💡" color="cyan">

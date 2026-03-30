@@ -4,7 +4,7 @@ import { useSocket } from '../context/SocketContext';
 import { useLanguage } from '../context/LanguageContext';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
-import Terminal from '../components/Terminal';
+import MultiTerminal, { useMultiTerminalId } from '../components/MultiTerminal';
 
 export default function FtpPage({ onBack }) {
   const { activeJob, activeJobId, updateJob } = useJobs();
@@ -12,7 +12,7 @@ export default function FtpPage({ onBack }) {
   const { t } = useLanguage();
   const [ip, setIp] = useState(activeJob?.ip || '');
 
-  const termId = `ftp-${activeJobId || 'default'}`;
+  const termId = useMultiTerminalId('ftp');
 
   const connect = () => {
     const target = ip || activeJob?.ip || '';
@@ -54,7 +54,7 @@ export default function FtpPage({ onBack }) {
         <button className="btn-pro btn-cyan" onClick={connectAnon}>👤 {t('ftp_connect_anon')}</button>
       </div>
 
-      <Terminal id={termId} title="FTP Terminal" height={300} />
+      <MultiTerminal prefix="ftp" defaultTitle="FTP Terminal" />
 
       <div style={{ marginTop: 24 }}>
         <SectionTitle icon="📋">{t('ftp_commands_ref')}</SectionTitle>

@@ -4,7 +4,7 @@ import { useSocket } from '../context/SocketContext';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
 import { useLanguage } from '../context/LanguageContext';
-import Terminal from '../components/Terminal';
+import MultiTerminal, { useMultiTerminalId } from '../components/MultiTerminal';
 
 export default function PhpShellPage({ onBack }) {
   const { t } = useLanguage();
@@ -15,7 +15,7 @@ export default function PhpShellPage({ onBack }) {
   const [targetIp, setTargetIp] = useState(activeJob?.ip || '');
   const [tab, setTab] = useState('shells');
 
-  const termId = `shell-${activeJobId || 'default'}`;
+  const termId = useMultiTerminalId('shell');
 
   const SHELLS = [
     {
@@ -81,7 +81,7 @@ export default function PhpShellPage({ onBack }) {
             <button className="btn-pro btn-green" style={{ height: 38 }} onClick={listen}>👂 {t('nc_listen')}</button>
           </div>
 
-          <Terminal id={termId} title="Netcat Listener" height={240} />
+          <MultiTerminal prefix="shell" defaultTitle="Netcat Listener" />
 
           <div style={{ marginTop: 24 }}>
             {SHELLS.map(s => (

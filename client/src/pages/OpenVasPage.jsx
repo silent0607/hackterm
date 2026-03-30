@@ -4,14 +4,14 @@ import { useJobs } from '../context/JobContext';
 import { useLanguage } from '../context/LanguageContext';
 import { InfoCard, SectionTitle, CmdLine } from '../components/InfoCard';
 import { Shield, ShieldAlert, Terminal as TermIcon, Play, Monitor, Activity, Settings } from 'lucide-react';
-import Terminal from '../components/Terminal';
+import MultiTerminal, { useMultiTerminalId } from '../components/MultiTerminal';
 
 export default function OpenVasPage({ onBack }) {
   const { t } = useLanguage();
   const { socket } = useSocket();
   const { activeJobId } = useJobs();
   const [running, setRunning] = useState(false);
-  const termId = `openvas-${activeJobId || 'default'}`;
+  const termId = useMultiTerminalId('openvas');
 
   // OpenVAS (GVM) Web UI is usually on port 9392 or similar
   // Note: GVM is extremely heavy. This page provides a controller for it.
@@ -65,7 +65,7 @@ export default function OpenVasPage({ onBack }) {
         </InfoCard>
       </div>
 
-      <Terminal id={termId} title="GVM System Log" height={180} />
+      <MultiTerminal prefix="openvas" defaultTitle="GVM System Log" />
 
       <div style={{ marginTop: 24 }}>
         <SectionTitle icon={<Settings size={16} />}>Admin Commands</SectionTitle>

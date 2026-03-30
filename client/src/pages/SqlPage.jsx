@@ -3,7 +3,7 @@ import { useJobs } from '../context/JobContext';
 import { useSocket } from '../context/SocketContext';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
-import Terminal from '../components/Terminal';
+import MultiTerminal, { useMultiTerminalId } from '../components/MultiTerminal';
 
 export default function SqlPage({ onBack }) {
   const { activeJob, activeJobId, updateJob } = useJobs();
@@ -14,7 +14,7 @@ export default function SqlPage({ onBack }) {
   const [port, setPort] = useState('3306');
   const [tab, setTab] = useState('mysql');
 
-  const termId = `sql-${activeJobId || 'default'}`;
+  const termId = useMultiTerminalId('sql');
 
   const connect = () => {
     const target = ip || activeJob?.ip || '127.0.0.1';
@@ -66,7 +66,7 @@ export default function SqlPage({ onBack }) {
             <button className="btn-pro btn-green" style={{ marginBottom: 0, height: 38 }} onClick={connect}>🔌 Bağlan</button>
           </div>
           
-          <Terminal id={termId} title="SQL Terminal" height={300} />
+          <MultiTerminal prefix="sql" defaultTitle="SQL Terminal" />
 
           <SectionTitle icon="📋">MySQL / MariaDB Komutları</SectionTitle>
           <InfoCard title="Temel Komutlar" icon="🗃" defaultOpen color="green">

@@ -4,7 +4,7 @@ import { useSocket } from '../context/SocketContext';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
 import { useLanguage } from '../context/LanguageContext';
-import Terminal from '../components/Terminal';
+import MultiTerminal, { useMultiTerminalId } from '../components/MultiTerminal';
 import FilePicker from '../components/FilePicker';
 
 const WORDLISTS = [
@@ -28,7 +28,7 @@ export default function GobusterPage({ onBack }) {
   const [ext, setExt] = useState('php,html,txt,bak');
   const [threads, setThreads] = useState('50');
 
-  const termId = `gobuster-${activeJobId || 'default'}`;
+  const termId = useMultiTerminalId('gobuster');
 
   const getUrl = () => {
       let target = ip || activeJob?.ip || '10.10.10.10';
@@ -90,7 +90,7 @@ export default function GobusterPage({ onBack }) {
         <button className="btn-pro btn-purple" onClick={runDns}>🔗 DNS Tara</button>
       </div>
 
-      <Terminal id={termId} title="Gobuster Engine Console" height={320} />
+      <MultiTerminal prefix="gobuster" defaultTitle="Gobuster Terminal" />
 
       <FilePicker 
         isOpen={isPickerOpen} 

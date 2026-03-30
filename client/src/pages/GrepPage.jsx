@@ -3,12 +3,12 @@ import { useJobs } from '../context/JobContext';
 import { useSocket } from '../context/SocketContext';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
-import Terminal from '../components/Terminal';
+import MultiTerminal, { useMultiTerminalId } from '../components/MultiTerminal';
 
 export default function GrepPage({ onBack }) {
   const { activeJobId } = useJobs();
   const { socket } = useSocket();
-  const termId = `grep-${activeJobId || 'default'}`;
+  const termId = useMultiTerminalId('grep');
 
   return (
     <div style={{ paddingBottom: 40 }}>
@@ -20,7 +20,7 @@ export default function GrepPage({ onBack }) {
         </div>
       </div>
 
-      <Terminal id={termId} title="Grep Terminal" height={240} />
+      <MultiTerminal prefix="grep" defaultTitle="Grep Terminal" />
 
       <div style={{ marginTop: 24 }}>
         <SectionTitle icon="📋">Grep Bayrak Referansı</SectionTitle>

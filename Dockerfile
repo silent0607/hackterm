@@ -51,6 +51,8 @@ RUN apt-get update && apt-get install -y \
     openvpn \
     firefox \
     dirb \
+    wireshark \
+    dbus-x11 \
     && curl -L https://github.com/OJ/gobuster/releases/download/v3.6.0/gobuster_Linux_x86_64.tar.gz -o gobuster.tar.gz \
     && tar -xzf gobuster.tar.gz \
     && mv gobuster /usr/bin/gobuster \

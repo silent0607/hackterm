@@ -4,14 +4,14 @@ import { useJobs } from '../context/JobContext';
 import { useLanguage } from '../context/LanguageContext';
 import { InfoCard, SectionTitle, CmdLine } from '../components/InfoCard';
 import { LayoutGrid, Monitor, Play, FileText, Search, ShieldAlert, Cpu } from 'lucide-react';
-import Terminal from '../components/Terminal';
+import MultiTerminal, { useMultiTerminalId } from '../components/MultiTerminal';
 
 export default function MetasploitPage({ onBack }) {
   const { t } = useLanguage();
   const { socket } = useSocket();
   const { activeJobId, jobs } = useJobs();
   const [running, setRunning] = useState(false);
-  const termId = `msf-${activeJobId || 'default'}`;
+  const termId = useMultiTerminalId('msf');
 
   const currentJob = jobs.find(j => j.id === activeJobId);
   const target = currentJob?.ip || '';
@@ -80,7 +80,7 @@ export default function MetasploitPage({ onBack }) {
         </InfoCard>
       </div>
 
-      <Terminal id={termId} title="Metasploit Console" />
+      <MultiTerminal prefix="msf" defaultTitle="Metasploit Console" />
 
       <div style={{ marginTop: 24 }}>
         <SectionTitle icon={<FileText size={16} />}>Common MSF Commands</SectionTitle>

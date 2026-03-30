@@ -4,7 +4,7 @@ import { useSocket } from '../context/SocketContext';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
 import { useLanguage } from '../context/LanguageContext';
-import Terminal from '../components/Terminal';
+import MultiTerminal, { useMultiTerminalId } from '../components/MultiTerminal';
 
 export default function NmapPage({ onBack }) {
   const { activeJob, activeJobId, updateJob } = useJobs();
@@ -13,7 +13,7 @@ export default function NmapPage({ onBack }) {
   const [ip, setIp] = useState(activeJob?.ip || '');
   const [ports, setPorts] = useState('');
 
-  const termId = `nmap-${activeJobId || 'default'}`;
+  const termId = useMultiTerminalId('nmap');
 
   const quickScan = () => {
     const target = ip || activeJob?.ip || '';
@@ -66,7 +66,7 @@ export default function NmapPage({ onBack }) {
         <span><b>Versiyon tarama:</b> Önce hızlı tara, açık portları gir → sadece o portların servis/versiyon bilgisini al</span>
       </div>
 
-      <Terminal id={termId} title="Nmap Terminal" />
+      <MultiTerminal prefix="nmap" defaultTitle="Nmap Terminal" />
 
       <div style={{ marginTop: 20 }}>
         <SectionTitle icon="📋">Nmap Komut Referansı</SectionTitle>

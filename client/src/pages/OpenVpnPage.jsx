@@ -4,7 +4,7 @@ import { useSocket } from '../context/SocketContext';
 import { InfoCard, SectionTitle } from '../components/InfoCard';
 import { Upload, Shield, ShieldOff, Activity, FileCode } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import Terminal from '../components/Terminal';
+import MultiTerminal, { useMultiTerminalId } from '../components/MultiTerminal';
 
 export default function OpenVpnPage({ onBack }) {
   const { t } = useLanguage();
@@ -15,7 +15,7 @@ export default function OpenVpnPage({ onBack }) {
   const [selectedFile, setSelectedFile] = useState('');
   const [uploading, setUploading] = useState(false);
 
-  const termId = `vpn-${activeJobId || 'default'}`;
+  const termId = useMultiTerminalId('vpn');
 
   const fetchStatus = async () => {
     try {
@@ -135,7 +135,7 @@ export default function OpenVpnPage({ onBack }) {
         </div>
       </div>
 
-      <Terminal id={termId} title="VPN Terminal / Logs" height={260} />
+      <MultiTerminal prefix="vpn" defaultTitle="VPN Terminal / Logs" />
 
       <div style={{ marginTop: 24 }}>
         <InfoCard title={t('vpn_about_title')} icon="ℹ️" color="purple">

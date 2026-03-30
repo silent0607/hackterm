@@ -3,7 +3,7 @@ import { useJobs } from '../context/JobContext';
 import { useSocket } from '../context/SocketContext';
 import { InfoCard, CmdLine, SectionTitle } from '../components/InfoCard';
 import { sendCmd } from '../utils/helpers';
-import Terminal from '../components/Terminal';
+import MultiTerminal, { useMultiTerminalId } from '../components/MultiTerminal';
 
 const WINDOWS_CARDS = [
   { id: 'smb', label: 'SMBclient', icon: '🗂', desc: 'Windows SMB paylaşımlarına eriş, dosya listele ve indir' },
@@ -12,7 +12,7 @@ const WINDOWS_CARDS = [
 ];
 
 function SmbSection({ ip, socket, jobId }) {
-  const termId = `smb-${jobId || 'default'}`;
+  const termId = useMultiTerminalId('smb');
   return (
     <div>
       <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
@@ -23,7 +23,7 @@ function SmbSection({ ip, socket, jobId }) {
           👤 Anonim Bağlan
         </button>
       </div>
-      <Terminal id={termId} title="SMBclient Terminal" height={260} />
+      <MultiTerminal prefix="smb" defaultTitle="SMBclient Terminal" />
       <SectionTitle icon="📋">SMBclient Komutları</SectionTitle>
       <InfoCard title="Bağlantı & Listeleme" icon="🗂" defaultOpen color="green">
         <CmdLine cmd={`smbclient -L //${ip} -N`} desc="Anonim bağlantı – paylaşımları listele" termId={termId} />
@@ -39,7 +39,7 @@ function SmbSection({ ip, socket, jobId }) {
 }
 
 function WinrmSection({ ip, socket, jobId }) {
-  const termId = `winrm-${jobId || 'default'}`;
+  const termId = useMultiTerminalId('winrm');
   const [user, setUser] = useState('Administrator');
   const [pass, setPass] = useState('');
   const connect = () => sendCmd(socket, termId, `evil-winrm -i ${ip} -u ${user} -p '${pass}'`);
@@ -58,7 +58,7 @@ function WinrmSection({ ip, socket, jobId }) {
         <button className="btn-pro btn-green" onClick={connect}>💀 Bağlan</button>
         <button className="btn-pro btn-orange" onClick={connectHash}>🔐 Hash ile Bağlan</button>
       </div>
-      <Terminal id={termId} title="Evil-WinRM Terminal" height={260} />
+      <MultiTerminal prefix="winrm" defaultTitle="Evil-WinRM Terminal" />
       <SectionTitle icon="📋">Evil-WinRM Komutları</SectionTitle>
       <InfoCard title="Temel Kullanım & Bayraklar" icon="💀" defaultOpen color="orange">
         <CmdLine cmd={`evil-winrm -i ${ip} -u <kullanici> -p <parola>`} desc="Parola ile bağlan" termId={termId} />
@@ -75,7 +75,7 @@ function WinrmSection({ ip, socket, jobId }) {
 }
 
 function MssqlSection({ ip, socket, jobId }) {
-  const termId = `mssql-${jobId || 'default'}`;
+  const termId = useMultiTerminalId('mssql');
   const [user, setUser] = useState('sa');
   const [pass, setPass] = useState('');
   const connect = () => sendCmd(socket, termId, `impacket-mssqlclient ${user}:${pass}@${ip}`);
@@ -94,7 +94,7 @@ function MssqlSection({ ip, socket, jobId }) {
         <button className="btn-pro btn-purple" onClick={connect}>🗃 Bağlan</button>
         <button className="btn-pro btn-orange" onClick={connectWin}>🪟 Windows Auth</button>
       </div>
-      <Terminal id={termId} title="MSSQL Client Terminal" height={260} />
+      <MultiTerminal prefix="mssql" defaultTitle="MSSQL Terminal" />
       <SectionTitle icon="📋">MSSQL Komutları</SectionTitle>
       <InfoCard title="xp_cmdshell ile Kod Çalıştırma" icon="⚡" defaultOpen color="orange">
         <div className="alert alert-orange">⚠ xp_cmdshell normalde kapalıdır, önce etkinleştir!</div>
