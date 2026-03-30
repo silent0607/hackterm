@@ -16,6 +16,8 @@ export default function BurpPage({ onBack }) {
   const [selectedFile, setSelectedFile] = useState('');
   const [installing, setInstalling] = useState(false);
   const [running, setRunning] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const termId = `burp-${activeJobId || 'default'}`;
 
@@ -84,16 +86,47 @@ export default function BurpPage({ onBack }) {
   const vncUrl = getVncUrl('6080');
   const firefoxUrl = getVncUrl('6081');
 
-  const handleUpload = async (e) => {
+  const handleUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const formData = new FormData();
     formData.append('file', file);
-    try {
-      await fetch('/api/upload', { method: 'POST', body: formData });
-      fetchFiles();
-    } catch (e) { alert(t('error')); }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/upload', true);
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        setUploadProgress(percent);
+      }
+    };
+
+    xhr.onloadstart = () => {
+      setIsUploading(true);
+      setUploadProgress(0);
+    };
+
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        setUploadProgress(100);
+        setTimeout(() => {
+          setIsUploading(false);
+          fetchFiles();
+        }, 1000);
+      } else {
+        alert(t('error'));
+        setIsUploading(false);
+      }
+    };
+
+    xhr.onerror = () => {
+      alert(t('error'));
+      setIsUploading(false);
+    };
+
+    xhr.send(formData);
   };
 
   const handleLaunchFirefox = async () => {
@@ -146,11 +179,21 @@ export default function BurpPage({ onBack }) {
                   <button className="btn-pro btn-cyan" onClick={handleInstall} disabled={installing || !selectedFile} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                     <Package size={16} /> {installing ? t('burp_installing') : t('burp_install_btn')}
                   </button>
-                  <label className="btn-pro btn-outline" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 12px' }}>
-                    <Upload size={16} />
-                    <input type="file" accept=".sh" style={{ display: 'none' }} onChange={handleUpload} />
+                  <label className="btn-pro btn-outline" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 12px', minWidth: 42 }}>
+                    {isUploading ? <span style={{ fontSize: 10, fontWeight: 'bold' }}>{uploadProgress}%</span> : <Upload size={16} />}
+                    <input type="file" accept=".sh" disabled={isUploading} style={{ display: 'none' }} onChange={handleUpload} />
                   </label>
                 </div>
+                {isUploading && (
+                  <div style={{ marginTop: 12 }}>
+                    <div className="progress-container" style={{ margin: '8px 0' }}>
+                      <div className="progress-bar" style={{ width: `${uploadProgress}%` }} />
+                    </div>
+                    <div className="progress-text" style={{ fontSize: 10, textAlign: 'left', color: 'var(--accent-cyan)' }}>
+                      {uploadProgress === 100 ? t('burp_upload_done') : `${t('burp_upload_progress')}${uploadProgress}`}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
