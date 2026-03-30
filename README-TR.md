@@ -71,6 +71,12 @@ python3 launcher.py
 
 ---
 
+## 💡 İpuçları & Sorun Giderme
+
+*   **🦈 Wireshark Arayüzü**: Eğer Wireshark **Ekran :3 (6082)** üzerinde otomatik olarak başlamazsa, panel içerisindeki herhangi bir terminal/shell sekmesini açıp `wireshark` yazarak manuel olarak başlatabilirsiniz.
+
+---
+
 ## 🛠️ Profesyonel Dağıtım (Nginx & SSL)
 
 Uygulamayı bir sunucu üzerinde (Django, PHP vb. ile birlikte) ve Cloudflare arkasında çalıştırmak için önerilen **Master Nginx Config** örneği:

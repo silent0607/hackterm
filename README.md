@@ -79,6 +79,12 @@ python3 launcher.py
 
 ---
 
+## 💡 Tips & Troubleshooting
+
+*   **🦈 Wireshark GUI**: If Wireshark does not start automatically on **Display :3 (6082)** after clicking launch, you can open any terminal/shell within the dashboard and type `wireshark` to launch it manually.
+
+---
+
 ## 🛠️ Professional Deployment (Nginx & SSL)
 
 For production environments (VPS/Cloud) using a reverse proxy and Cloudflare, here is the **Master Nginx Config**:
