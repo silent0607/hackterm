@@ -110,6 +110,9 @@ const upload = multer({ storage });
 // VPN Status
 let vpnProcess = null;
 
+// Dedicated Multer for chunks (avoid smart destination logic collisions)
+const chunkUpload = multer({ dest: '/tmp' });
+
 // File upload endpoint (Standard)
 app.post('/api/upload', upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Dosya seçilmedi' });
@@ -117,43 +120,68 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 });
 
 // Chunked upload endpoint (Bypass Cloudflare 100MB limit)
-app.post('/api/upload/chunk', upload.single('file'), (req, res) => {
+app.post('/api/upload/chunk', chunkUpload.single('file'), (req, res) => {
   const { chunkIndex, totalChunks, filename } = req.body;
   const file = req.file;
 
-  if (!file) return res.status(400).json({ error: 'Parça verisi eksik' });
+  if (!file) {
+    console.error('[!] Chunk upload: No file received');
+    return res.status(400).json({ error: 'Parça verisi eksik' });
+  }
 
-  // Move chunk to temporary chunk storage
-  const chunkFileName = `${filename}.part_${chunkIndex}`;
-  const chunkPath = path.join(CHUNKS_DIR, chunkFileName);
-  
-  // Use rename instead of original multer storage to have control over chunk naming
-  fs.renameSync(file.path, chunkPath);
-
-  // If last chunk, merge all parts
-  if (parseInt(chunkIndex) === parseInt(totalChunks) - 1) {
-    const ext = path.extname(filename).toLowerCase();
-    const finalDir = ext === '.ovpn' ? OVPN_DIR : ext === '.sh' ? TOOLS_DIR : FTP_DIR;
-    const finalPath = path.join(finalDir, filename);
+  try {
+    // Move chunk to temporary chunk storage
+    const chunkFileName = `${filename}.part_${chunkIndex}`;
+    const chunkPath = path.join(CHUNKS_DIR, chunkFileName);
     
-    try {
-        const writeStream = fs.createWriteStream(finalPath);
+    // Use copyFileSync + unlinkSync instead of renameSync 
+    // to handle moving files across different partitions (common in Docker/VPS)
+    fs.copyFileSync(file.path, chunkPath);
+    fs.unlinkSync(file.path); 
+
+    // If last chunk, merge all parts
+    if (parseInt(chunkIndex) === parseInt(totalChunks) - 1) {
+      const ext = path.extname(filename).toLowerCase();
+      const finalDir = ext === '.ovpn' ? OVPN_DIR : ext === '.sh' ? TOOLS_DIR : FTP_DIR;
+      const finalPath = path.join(finalDir, filename);
+
+      console.log(`[+] Merging ${totalChunks} chunks for: ${filename}`);
+      const writeStream = fs.createWriteStream(finalPath);
+      
+      const mergeChunks = async () => {
         for (let i = 0; i < totalChunks; i++) {
           const partPath = path.join(CHUNKS_DIR, `${filename}.part_${i}`);
           if (fs.existsSync(partPath)) {
-            const data = fs.readFileSync(partPath);
-            writeStream.write(data);
-            fs.unlinkSync(partPath); // Clean up
+            const readStream = fs.createReadStream(partPath);
+            await new Promise((resolve, reject) => {
+              readStream.pipe(writeStream, { end: false });
+              readStream.on('end', () => {
+                fs.unlinkSync(partPath); // Clean up immediately
+                resolve();
+              });
+              readStream.on('error', reject);
+            });
+          } else {
+            throw new Error(`Eksik parça: ${i}`);
           }
         }
         writeStream.end();
-        return res.json({ message: 'Dosya birleştirildi', filename, completed: true });
-    } catch (err) {
-        return res.status(500).json({ error: 'Birleştirme hatası: ' + err.message });
-    }
-  }
+      };
 
-  res.json({ message: `Parça ${chunkIndex} tamamlandı`, completed: false });
+      mergeChunks()
+        .then(() => res.json({ message: 'Dosya birleştirildi', filename, completed: true }))
+        .catch(err => {
+          console.error('[!] Merge error:', err);
+          res.status(500).json({ error: 'Birleştirme hatası: ' + err.message });
+        });
+      return;
+    }
+
+    res.json({ message: `Parça ${chunkIndex} tamamlandı`, completed: false });
+  } catch (err) {
+    console.error('[!] Chunk merge error:', err);
+    return res.status(500).json({ error: 'İşlem hatası: ' + err.message });
+  }
 });
 
 // VPN Endpoints

@@ -103,10 +103,10 @@ export default function BurpPage({ onBack }) {
             const chunk = file.slice(start, end);
 
             const formData = new FormData();
-            formData.append('file', chunk);
             formData.append('chunkIndex', i);
             formData.append('totalChunks', totalChunks);
             formData.append('filename', file.name);
+            formData.append('file', chunk); // MUST BE LAST FOR SOME PARSERS
 
             await new Promise((resolve, reject) => {
                 const xhr = new XMLHttpRequest();
@@ -118,7 +118,12 @@ export default function BurpPage({ onBack }) {
                         setUploadProgress(currentProgress);
                         resolve();
                     } else {
-                        reject(new Error(`Server error: ${xhr.status}`));
+                        try {
+                            const errorData = JSON.parse(xhr.responseText);
+                            reject(new Error(errorData.error || `HTTP ${xhr.status}`));
+                        } catch (e) {
+                            reject(new Error(`HTTP ${xhr.status}`));
+                        }
                     }
                 };
                 
