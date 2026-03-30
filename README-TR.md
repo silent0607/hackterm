@@ -117,6 +117,10 @@ server {
         proxy_hide_header Content-Security-Policy;
         add_header Content-Security-Policy "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors 'self';";
         
+        # DEV DOSYA YÜKLEME FİX (1MB LIMITINI KALDIR & İLERLEME ÇUBUĞUNU AKTİF ET)
+        client_max_body_size 0;
+        proxy_request_buffering off;
+        
         proxy_read_timeout 86400s;
     }
 

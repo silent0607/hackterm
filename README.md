@@ -125,6 +125,10 @@ server {
         proxy_hide_header Content-Security-Policy;
         add_header Content-Security-Policy "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors 'self';";
         
+        # LARGE FILE UPLOAD FIX (OVERRIDE 1MB LIMIT & ENABLE PROGRESS)
+        client_max_body_size 0;
+        proxy_request_buffering off;
+        
         proxy_read_timeout 86400s;
     }
 
